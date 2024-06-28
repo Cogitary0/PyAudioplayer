@@ -41,8 +41,6 @@ class MainWindow(QWidget):
         self.stopButton.setEnabled(False)
         layout.addWidget(self.stopButton)
 
-        
-
         self.setLayout(layout)
 
     def printLabel(self, text) -> None:
