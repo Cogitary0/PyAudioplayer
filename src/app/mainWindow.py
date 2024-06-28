@@ -20,6 +20,8 @@ class MainWindow(QWidget):
         
         self.media_player = QMediaPlayer(None, QMediaPlayer.StreamPlayback)
         self.media_player.mediaStatusChanged.connect(self.printMediaData)
+        self.media_player.positionChanged.connect(self.update_position)
+        self.media_player.durationChanged.connect(self.update_duration)
         
         self.folder_path = None
         self.music_files = []
@@ -107,21 +109,19 @@ class MainWindow(QWidget):
     
     def printDataLabel(self, text):
         self.dataLabel.setText(text)
-        
-    
+
+
     def update_position(self, position):
-        self.positionSlider.setValue(position)
-
-
-    def update_duration(self, duration):
-        self.positionSlider.setMaximum(duration)
+        if self.media_player.duration() != 0:
+            self.positionSlider.setValue(int(position / self.media_player.duration() * 100))
 
 
     def seek_position(self, position):
-        self.media_player.setPosition(position)
+        if self.media_player.duration() != 0:
+            self.media_player.setPosition(int(position / 100 * self.media_player.duration()))
 
 
-    
+        
     def enabledWidget(self, enabled:bool):
         self.playStopButton.setEnabled(enabled)
         self.prevButton.setEnabled(enabled)
