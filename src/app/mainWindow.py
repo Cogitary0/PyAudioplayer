@@ -12,7 +12,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('Music Player')
+        self.setWindowTitle('PyPy MusicPlayer')
         self.setFixedSize(QSize(WINW, WINH))
         
         with open("src\\assets\\css\\styles.css", 'r') as styleFile:
@@ -42,11 +42,11 @@ class MainWindow(QWidget):
         utilsLayout = QHBoxLayout()
         
         self.statusLabel = QLabel()
-        self.statusLabel.setFixedHeight(42)
+        self.statusLabel.setFixedHeight(50)
         layout.addWidget(self.statusLabel)
         
-        self.dataLabel = QLabel()
-        layout.addWidget(self.dataLabel)
+        # self.dataLabel = QLabel()
+        # layout.addWidget(self.dataLabel)
         
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setMinimum(0)
@@ -102,9 +102,11 @@ class MainWindow(QWidget):
         
         
         self.timer = QTimer(self)
-        self.timer.setInterval(50)  # Update every 1 second
+        self.timer.setInterval(25)
         self.timer.timeout.connect(self.update_slider_position)
         self.timer.start()
+        
+        self.statusLabel.setText("   No metadata available")
 
 
     def printInfoLabel(self, text):
@@ -137,7 +139,7 @@ class MainWindow(QWidget):
                 self.current_song = 0
                 self.play_song(self.music_files[self.current_song])
             else:
-                self.printInfoLabel("No music files found in the folder.")
+                self.printInfoLabel(" No music files found in the folder.")
 
 
     def play_song(self, filename):
@@ -159,15 +161,17 @@ class MainWindow(QWidget):
 
 
     def prev_song(self):
-        self.current_song = (self.current_song - 1) % len(self.music_files)
-        self.media_player.stop()
-        self.play_song(self.music_files[self.current_song])
+        if len(self.music_files) > 0:
+            self.current_song = (self.current_song - 1) % len(self.music_files)
+            self.media_player.stop()
+            self.play_song(self.music_files[self.current_song])
         
 
     def next_song(self): 
-        self.current_song = (self.current_song + 1) % len(self.music_files)
-        self.media_player.stop()
-        self.play_song(self.music_files[self.current_song])
+        if len(self.music_files) > 0:
+            self.current_song = (self.current_song + 1) % len(self.music_files)
+            self.media_player.stop()
+            self.play_song(self.music_files[self.current_song])
 
 
     def change_volume(self, value):
@@ -180,8 +184,9 @@ class MainWindow(QWidget):
                 title = self.media_player.metaData("Title")
                 author = self.media_player.metaData("Author")
                 
-                self.printInfoLabel("Title: {}\nAuth: {}".format(title,author))
+                self.printInfoLabel(" {}\n {}".format(title,author))
                 
                 print(f"Title: {title}, Author: {author}")
             else:
+                self.printDataLabel(" No metadata available")
                 print("no metaData available")
