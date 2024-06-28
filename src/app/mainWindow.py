@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QSlider, QHBoxLayout
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize
+from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QPalette, QIcon
 
 WINW = 360
@@ -30,13 +30,16 @@ class MainWindow(QWidget):
         self.stop_icon = QIcon('src\\assets\\icons\\stop.png')
         self.next_icon = QIcon('src\\assets\\icons\\next.png')
         self.prev_icon = QIcon('src\\assets\\icons\\prev.png')
-
+        self.folder_icon = QIcon('src\\assets\\icons\\folderOpen.png')
+        self.downloader_icon = QIcon('src\\assets\\icons\\downloader.png')
+        
         self.initUI()
 
     def initUI(self):
         
         layout = QVBoxLayout()
         controlLayout = QHBoxLayout()
+        utilsLayout = QHBoxLayout()
         
         self.statusLabel = QLabel()
         self.statusLabel.setFixedHeight(42)
@@ -45,10 +48,19 @@ class MainWindow(QWidget):
         self.dataLabel = QLabel()
         layout.addWidget(self.dataLabel)
         
-        self.openFolderButton = QPushButton('Open Folder')
-        self.openFolderButton.clicked.connect(self.open_folder)
-        layout.addWidget(self.openFolderButton)
+        self.positionSlider = QSlider(Qt.Horizontal)
+        self.positionSlider.setMinimum(0)
+        self.positionSlider.setMaximum(100)
+        self.positionSlider.setValue(0)
+        self.positionSlider.valueChanged.connect(self.seek_position)
+        layout.addWidget(self.positionSlider)
         
+        
+        self.openFolderButton = QPushButton()
+        self.openFolderButton.setIcon(self.folder_icon)
+        self.openFolderButton.clicked.connect(self.open_folder)
+        utilsLayout.addWidget(self.openFolderButton)
+            
         
         self.prevButton = QPushButton()
         self.prevButton.setIcon(self.prev_icon)
@@ -56,11 +68,13 @@ class MainWindow(QWidget):
         self.prevButton.setEnabled(False)
         controlLayout.addWidget(self.prevButton)
         
+        
         self.playStopButton = QPushButton()
         self.playStopButton.setIcon(self.play_icon)
         self.playStopButton.clicked.connect(self.play_stop_song)
         self.playStopButton.setEnabled(False)
         controlLayout.addWidget(self.playStopButton)
+        
         
         self.nextButton = QPushButton()
         self.nextButton.setIcon(self.next_icon)
@@ -68,8 +82,14 @@ class MainWindow(QWidget):
         self.nextButton.setEnabled(False)
         controlLayout.addWidget(self.nextButton)
         
+        self.windowDownloader = QPushButton()
+        self.windowDownloader.setIcon(self.downloader_icon)
+        # self.windowDownloader.clicked.connect(self.next_song)
+        utilsLayout.addWidget(self.windowDownloader)
         
         layout.addLayout(controlLayout)
+        layout.addLayout(utilsLayout)
+        
         
         self.volumeSlider = QSlider(orientation=Qt.Horizontal)
         self.volumeSlider.setRange(0, 100)
@@ -77,7 +97,14 @@ class MainWindow(QWidget):
         self.volumeSlider.valueChanged.connect(self.change_volume)
         layout.addWidget(self.volumeSlider)
         
+        
         self.setLayout(layout)
+        
+        
+        self.timer = QTimer(self)
+        self.timer.setInterval(50)  # Update every 1 second
+        self.timer.timeout.connect(self.update_slider_position)
+        self.timer.start()
 
 
     def printInfoLabel(self, text):
@@ -86,7 +113,18 @@ class MainWindow(QWidget):
     
     def printDataLabel(self, text):
         self.dataLabel.setText(text)
-
+        
+        
+    def seek_position(self, position):
+        if self.media_player.mediaStatus() == QMediaPlayer.MediaStatus.LoadedMedia:
+            self.media_player.setPosition(int(position * self.media_player.duration() / 100))
+        else:
+            self.positionSlider.setEnabled(False)
+    
+    def update_slider_position(self):
+        if self.media_player.duration() != 0:
+            self.positionSlider.setValue(int(self.media_player.position() * 100 / self.media_player.duration()))
+        
 
     def open_folder(self):
         self.folder_path = QFileDialog.getExistingDirectory(self, "Open Folder")
@@ -96,7 +134,8 @@ class MainWindow(QWidget):
                 self.playStopButton.setEnabled(True)
                 self.prevButton.setEnabled(True)
                 self.nextButton.setEnabled(True)
-
+                self.current_song = 0
+                self.play_song(self.music_files[self.current_song])
             else:
                 self.printInfoLabel("No music files found in the folder.")
 
@@ -110,7 +149,7 @@ class MainWindow(QWidget):
 
     def play_stop_song(self):
         if self.playing:
-            self.media_player.stop()
+            self.media_player.pause()
             self.playStopButton.setIcon(self.play_icon)
             self.playing = False
         else:
@@ -120,18 +159,15 @@ class MainWindow(QWidget):
 
 
     def prev_song(self):
-        self.current_song = self.current_song if self.current_song > 0 else len(self.music_files)
+        self.current_song = (self.current_song - 1) % len(self.music_files)
         self.media_player.stop()
-        self.play_song(self.music_files[self.current_song - 1])
-        self.current_song -= 1
+        self.play_song(self.music_files[self.current_song])
         
 
-
-    def next_song(self):
-        self.current_song = self.current_song if self.current_song < len(self.music_files) else 0
+    def next_song(self): 
+        self.current_song = (self.current_song + 1) % len(self.music_files)
         self.media_player.stop()
-        self.play_song(self.music_files[self.current_song + 1])
-        self.current_song += 1
+        self.play_song(self.music_files[self.current_song])
 
 
     def change_volume(self, value):
