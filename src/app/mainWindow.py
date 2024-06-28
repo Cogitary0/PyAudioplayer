@@ -19,24 +19,29 @@ class MainWindow(QWidget):
         
         self.media_player = QMediaPlayer(None, QMediaPlayer.StreamPlayback)
         self.media_player.mediaStatusChanged.connect(self.printMediaData)
+        self.filename = None
 
     def initUI(self):
         layout = QVBoxLayout()
-
-        openFileButton = QPushButton('Open File')
-        openFileButton.clicked.connect(self.open_file)
-        layout.addWidget(openFileButton)
-
-        playButton = QPushButton('Play')
-        playButton.clicked.connect(self.play_song)
-        layout.addWidget(playButton)
-
-        stopButton = QPushButton('Stop')
-        stopButton.clicked.connect(self.stop_song)
-        layout.addWidget(stopButton)
-
+        
         self.statusLabel = QLabel()
         layout.addWidget(self.statusLabel)
+
+        self.openFileButton = QPushButton('Open File')
+        self.openFileButton.clicked.connect(self.open_file)
+        layout.addWidget(self.openFileButton)
+
+        self.playButton = QPushButton('Play')
+        self.playButton.clicked.connect(self.play_song)
+        self.playButton.setEnabled(False)
+        layout.addWidget(self.playButton)
+
+        self.stopButton = QPushButton('Stop')
+        self.stopButton.clicked.connect(self.stop_song)
+        self.stopButton.setEnabled(False)
+        layout.addWidget(self.stopButton)
+
+        
 
         self.setLayout(layout)
 
@@ -47,13 +52,16 @@ class MainWindow(QWidget):
         self.filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.wav)")
         if self.filename:
             self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.filename)))
+            self.playButton.setEnabled(True)
+            self.stopButton.setEnabled(True)
 
     def play_song(self):
         if self.filename:
             self.media_player.play()
 
     def stop_song(self):
-        self.media_player.stop()
+        if self.filename:
+            self.media_player.stop()
 
     def printMediaData(self):
         if self.media_player.mediaStatus() == 6:
