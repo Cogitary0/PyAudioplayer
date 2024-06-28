@@ -1,36 +1,47 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QColor, QPalette
 
-class MusicPlayer(QWidget):
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.WINW = 360
+        self.WINH = 140
+        self.setGeometry(300, 300, self.WINW, self.WINH)
+        self.setFixedSize(self.WINW, self.WINH)
+        self.setWindowTitle('Music Player')
         self.initUI()
-
-    def style(self, fileStyle):
-        self.setStyle(fileStyle)
+        
+        with open("src\\assets\\css\\styles.css", 'r') as styleFile:
+            self.setStyleSheet(styleFile.read())
+        
+        self.media_player = QMediaPlayer(None, QMediaPlayer.StreamPlayback)
+        self.media_player.mediaStatusChanged.connect(self.printMediaData)
 
     def initUI(self):
-        self.setWindowTitle("Music Player")
-        self.setGeometry(100, 100, 400, 200)
+        layout = QVBoxLayout()
 
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
+        openFileButton = QPushButton('Open File')
+        openFileButton.clicked.connect(self.open_file)
+        layout.addWidget(openFileButton)
 
-        self.open_button = QPushButton("Open")
-        self.open_button.clicked.connect(self.open_file)
-        self.layout.addWidget(self.open_button)
+        playButton = QPushButton('Play')
+        playButton.clicked.connect(self.play_song)
+        layout.addWidget(playButton)
 
-        self.play_button = QPushButton("Play")
-        self.play_button.clicked.connect(self.play_song)
-        self.layout.addWidget(self.play_button)
+        stopButton = QPushButton('Stop')
+        stopButton.clicked.connect(self.stop_song)
+        layout.addWidget(stopButton)
 
-        self.stop_button = QPushButton("Stop")
-        self.stop_button.clicked.connect(self.stop_song)
-        self.layout.addWidget(self.stop_button)
+        self.statusLabel = QLabel()
+        layout.addWidget(self.statusLabel)
 
-        self.media_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+        self.setLayout(layout)
+
+    def printLabel(self, text) -> None:
+        self.statusLabel.setText(text)
 
     def open_file(self):
         self.filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.wav)")
@@ -44,3 +55,10 @@ class MusicPlayer(QWidget):
     def stop_song(self):
         self.media_player.stop()
 
+    def printMediaData(self):
+        if self.media_player.mediaStatus() == 6:
+            if self.media_player.isMetaDataAvailable():
+                res = str(self.media_player.metaData("Resolution")).partition("PyQt5.QtCore.QSize(").replace(", ", "x").replace(")", "")
+                print("%s%s" % ("Audio Resolution = ", res))
+            else:
+                print("no metaData available")
