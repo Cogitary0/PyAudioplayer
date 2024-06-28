@@ -1,38 +1,46 @@
-import customtkinter
-from tkinter import filedialog
-from pygame import mixer
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtCore import QUrl
 
-class MusicPlayer(customtkinter.CTk):
+class MusicPlayer(QWidget):
     def __init__(self):
         super().__init__()
-        self.geometry("400x200")
-        self.title("PyPy Musicplayer")
+        self.initUI()
 
-        self.mixer = mixer
-        self.mixer.init()
+    def style(self, fileStyle):
+        self.setStyle(fileStyle)
 
-        self.track = customtkinter.CTkLabel(self, text="No song playing")
-        self.track.pack(pady=20)
+    def initUI(self):
+        self.setWindowTitle("Music Player")
+        self.setGeometry(100, 100, 400, 200)
 
-        self.open_button = customtkinter.CTkButton(self, text="Open", command=self.open_file)
-        self.open_button.pack(pady=10)
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
 
-        self.play_button = customtkinter.CTkButton(self, text="Play", command=self.play_song)
-        self.play_button.pack(pady=10)
+        self.open_button = QPushButton("Open")
+        self.open_button.clicked.connect(self.open_file)
+        self.layout.addWidget(self.open_button)
 
-        self.stop_button = customtkinter.CTkButton(self, text="Stop", command=self.stop_song)
-        self.stop_button.pack(pady=10)
+        self.play_button = QPushButton("Play")
+        self.play_button.clicked.connect(self.play_song)
+        self.layout.addWidget(self.play_button)
+
+        self.stop_button = QPushButton("Stop")
+        self.stop_button.clicked.connect(self.stop_song)
+        self.layout.addWidget(self.stop_button)
+
+        self.media_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
     def open_file(self):
-        self.filename = filedialog.askopenfilename(filetypes=[('Audio Files', ['*.mp3', '*.wav'])])
+        self.filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Audio Files (*.mp3 *.wav)")
         if self.filename:
-            self.track.config(text=self.filename)
+            self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.filename)))
 
     def play_song(self):
         if self.filename:
-            self.mixer.music.load(self.filename)
-            self.mixer.music.play()
+            self.media_player.play()
 
     def stop_song(self):
-        self.mixer.music.stop()
+        self.media_player.stop()
 
