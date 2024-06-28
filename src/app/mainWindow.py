@@ -5,7 +5,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QPalette, QIcon
 
-WINW = 360
+WINW = 300
 WINH = 240
 
 class MainWindow(QWidget):
@@ -45,16 +45,6 @@ class MainWindow(QWidget):
         self.statusLabel.setFixedHeight(50)
         layout.addWidget(self.statusLabel)
         
-        # self.dataLabel = QLabel()
-        # layout.addWidget(self.dataLabel)
-        
-        self.positionSlider = QSlider(Qt.Horizontal)
-        self.positionSlider.setMinimum(0)
-        self.positionSlider.setMaximum(100)
-        self.positionSlider.setValue(0)
-        self.positionSlider.valueChanged.connect(self.seek_position)
-        layout.addWidget(self.positionSlider)
-        
         
         self.openFolderButton = QPushButton()
         self.openFolderButton.setIcon(self.folder_icon)
@@ -65,21 +55,18 @@ class MainWindow(QWidget):
         self.prevButton = QPushButton()
         self.prevButton.setIcon(self.prev_icon)
         self.prevButton.clicked.connect(self.prev_song)
-        self.prevButton.setEnabled(False)
         controlLayout.addWidget(self.prevButton)
         
         
         self.playStopButton = QPushButton()
         self.playStopButton.setIcon(self.play_icon)
         self.playStopButton.clicked.connect(self.play_stop_song)
-        self.playStopButton.setEnabled(False)
         controlLayout.addWidget(self.playStopButton)
         
         
         self.nextButton = QPushButton()
         self.nextButton.setIcon(self.next_icon)
         self.nextButton.clicked.connect(self.next_song)
-        self.nextButton.setEnabled(False)
         controlLayout.addWidget(self.nextButton)
         
         self.windowDownloader = QPushButton()
@@ -97,14 +84,19 @@ class MainWindow(QWidget):
         self.volumeSlider.valueChanged.connect(self.change_volume)
         layout.addWidget(self.volumeSlider)
         
+                
+        self.positionSlider = QSlider(Qt.Horizontal)
+        self.positionSlider.setMinimum(0)
+        self.positionSlider.setMaximum(100)
+        self.positionSlider.setValue(0)
+        self.positionSlider.valueChanged.connect(self.seek_position)
+        # self.positionSlider.sliderPressed.connect(self.slider_pressed)
+        # self.positionSlider.sliderReleased.connect(self.slider_pressed)
+        layout.addWidget(self.positionSlider)
+        
         
         self.setLayout(layout)
-        
-        
-        self.timer = QTimer(self)
-        self.timer.setInterval(25)
-        self.timer.timeout.connect(self.update_slider_position)
-        self.timer.start()
+        self.enabledWidget(False)
         
         self.statusLabel.setText("   No metadata available")
 
@@ -116,26 +108,33 @@ class MainWindow(QWidget):
     def printDataLabel(self, text):
         self.dataLabel.setText(text)
         
-        
-    def seek_position(self, position):
-        if self.media_player.mediaStatus() == QMediaPlayer.MediaStatus.LoadedMedia:
-            self.media_player.setPosition(int(position * self.media_player.duration() / 100))
-        else:
-            self.positionSlider.setEnabled(False)
     
-    def update_slider_position(self):
-        if self.media_player.duration() != 0:
-            self.positionSlider.setValue(int(self.media_player.position() * 100 / self.media_player.duration()))
-        
+    def update_position(self, position):
+        self.positionSlider.setValue(position)
+
+
+    def update_duration(self, duration):
+        self.positionSlider.setMaximum(duration)
+
+
+    def seek_position(self, position):
+        self.media_player.setPosition(position)
+
+
+    
+    def enabledWidget(self, enabled:bool):
+        self.playStopButton.setEnabled(enabled)
+        self.prevButton.setEnabled(enabled)
+        self.nextButton.setEnabled(enabled)
+        self.positionSlider.setEnabled(enabled)
+    
 
     def open_folder(self):
         self.folder_path = QFileDialog.getExistingDirectory(self, "Open Folder")
         if self.folder_path:
             self.music_files = [f for f in os.listdir(self.folder_path) if f.endswith('.mp3') or f.endswith('.wav')]
             if self.music_files:
-                self.playStopButton.setEnabled(True)
-                self.prevButton.setEnabled(True)
-                self.nextButton.setEnabled(True)
+                self.enabledWidget(True)
                 self.current_song = 0
                 self.play_song(self.music_files[self.current_song])
             else:
