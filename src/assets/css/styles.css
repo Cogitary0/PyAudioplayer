@@ -30,3 +30,11 @@ QPushButton:pressed {
     background-color: #555;
 }
 
+
+QSlider::handle:horizontal {
+    height: 14px;
+    margin: 10px;
+    border: #333;
+    border-radius: 4px;
+    background-color: #4e4e4e;
+}
