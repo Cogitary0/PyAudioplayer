@@ -1,12 +1,12 @@
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QSlider
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QSlider, QHBoxLayout
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize
 from PyQt5.QtGui import QColor, QPalette, QIcon
 
-WINW = 460
-WINH = 340
+WINW = 360
+WINH = 240
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -34,51 +34,58 @@ class MainWindow(QWidget):
         self.initUI()
 
     def initUI(self):
+        
         layout = QVBoxLayout()
+        controlLayout = QHBoxLayout()
         
         self.statusLabel = QLabel()
-       
-
+        self.statusLabel.setFixedHeight(42)
+        layout.addWidget(self.statusLabel)
+        
+        self.dataLabel = QLabel()
+        layout.addWidget(self.dataLabel)
+        
         self.openFolderButton = QPushButton('Open Folder')
         self.openFolderButton.clicked.connect(self.open_folder)
+        layout.addWidget(self.openFolderButton)
         
         
-        self.playStopButton = QPushButton("")
-        self.playStopButton.setIcon(self.play_icon)
-        self.playStopButton.clicked.connect(self.play_stop_song)
-        self.playStopButton.setEnabled(False)
-        
-
-        self.prevButton = QPushButton("")
+        self.prevButton = QPushButton()
         self.prevButton.setIcon(self.prev_icon)
         self.prevButton.clicked.connect(self.prev_song)
         self.prevButton.setEnabled(False)
+        controlLayout.addWidget(self.prevButton)
         
-
-        self.nextButton = QPushButton("")
+        self.playStopButton = QPushButton()
+        self.playStopButton.setIcon(self.play_icon)
+        self.playStopButton.clicked.connect(self.play_stop_song)
+        self.playStopButton.setEnabled(False)
+        controlLayout.addWidget(self.playStopButton)
+        
+        self.nextButton = QPushButton()
         self.nextButton.setIcon(self.next_icon)
         self.nextButton.clicked.connect(self.next_song)
         self.nextButton.setEnabled(False)
+        controlLayout.addWidget(self.nextButton)
         
-
+        
+        layout.addLayout(controlLayout)
+        
         self.volumeSlider = QSlider(orientation=Qt.Horizontal)
         self.volumeSlider.setRange(0, 100)
         self.volumeSlider.setValue(50)
         self.volumeSlider.valueChanged.connect(self.change_volume)
-        
-        
-        
-        layout.addWidget(self.statusLabel)
-        layout.addWidget(self.openFolderButton)
-        layout.addWidget(self.playStopButton)
-        layout.addWidget(self.prevButton)
-        layout.addWidget(self.nextButton)
         layout.addWidget(self.volumeSlider)
+        
         self.setLayout(layout)
 
 
-    def printLabel(self, text) -> None:
+    def printInfoLabel(self, text):
         self.statusLabel.setText(text)
+        
+    
+    def printDataLabel(self, text):
+        self.dataLabel.setText(text)
 
 
     def open_folder(self):
@@ -91,7 +98,7 @@ class MainWindow(QWidget):
                 self.nextButton.setEnabled(True)
 
             else:
-                self.printLabel("No music files found in the folder.")
+                self.printInfoLabel("No music files found in the folder.")
 
 
     def play_song(self, filename):
@@ -137,7 +144,7 @@ class MainWindow(QWidget):
                 title = self.media_player.metaData("Title")
                 author = self.media_player.metaData("Author")
                 
-                self.printLabel("{} {}".format(title,author))
+                self.printInfoLabel("Title: {}\nAuth: {}".format(title,author))
                 
                 print(f"Title: {title}, Author: {author}")
             else:
