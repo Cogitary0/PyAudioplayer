@@ -1,5 +1,7 @@
 language = "en"
-theme = "light"
-def_volume = 50
+theme = "dark"
+def_volume = 0
 win_width = 300
 win_height = 240
+path_to_music = "C:/Users/asd/Desktop/PyPy/PyPyAudioplayer/audio"
+current_song = 1

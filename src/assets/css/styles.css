@@ -16,6 +16,17 @@ QPushButton {
     color: #ffffff;
 }
 
+QPushButton:hover {
+    background-color: #444;
+}
+
+QPushButton:pressed {
+    background-color: #555;
+    padding: 4px; 
+    font-size: 12px; 
+}
+
+
 QLabel {
     background-color: #141414;
     border: 2px solid #333;
@@ -25,14 +36,6 @@ QLabel {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
-QPushButton:hover {
-    background-color: #444;
-}
-
-QPushButton:pressed {
-    background-color: #555;
-}
-
 
 QSlider::groove:horizontal {
     height: 10px;
@@ -40,8 +43,8 @@ QSlider::groove:horizontal {
 }
 
 QSlider::handle:horizontal {
-    background: #141414;
-    border: 2px solid #4e4e4e;
+    background: #4e4e4e;
+    /* border: 2px solid #4e4e4e; */
     width: 10px;
     margin: -5px 0px;
     border-radius: 5px;
@@ -56,8 +59,7 @@ QSlider::sub-page:horizontal {
 QProgressBar {
     border: 2px solid #333;
     border-radius: 5px;
-    text-align: center;
-    padding: 2px;
+    padding: 1px;
     background-color: #141414;
     height: 10px;
 }
