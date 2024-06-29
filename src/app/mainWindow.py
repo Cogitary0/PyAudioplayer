@@ -33,10 +33,10 @@ class MainWindow(QWidget):
         self.folder_icon = QIcon(ICONS_PATH + 'folderOpen.png')
         self.downloader_icon = QIcon(ICONS_PATH + 'downloader.png')
         self.settings_icon = QIcon(ICONS_PATH + 'settings.png')
-        self.setStyleSheet(self.getStyle('styles'))
+        self.setStyleSheet(self.get_style_file('styles'))
 
         self.media_player = QMediaPlayer(None, QMediaPlayer.StreamPlayback)
-        self.media_player.mediaStatusChanged.connect(self.printMediaData)
+        self.media_player.mediaStatusChanged.connect(self.print_media_data)
         self.media_player.positionChanged.connect(self.update_position)
         self.media_player.durationChanged.connect(self.update_duration)
         self.media_player.stateChanged.connect(self.mediaStateChanged)
@@ -46,44 +46,51 @@ class MainWindow(QWidget):
         self.playing = False
         self.music_files = []
 
-        self.initUI()
+        self.init_ui()
 
         if self.folder_path:
             self.music_files = [f for f in os.listdir(self.folder_path) if f.endswith('.mp3') or f.endswith('.wav')]
             if self.music_files:
-                self.enabledWidget(True)
+                self.enabled_widget(True)
                 self.play_song(self.music_files[self.current_song])
             else:
-                self.printInfoLabel(" No music files found in the folder.")
+                self.print_label(" No music files found in the folder.")
         else:
-            self.printInfoLabel(" No metadata available")
+            self.print_label(" No metadata available")
 
     
 
-    def initUI(self):
+    def init_ui(self):
         layout = QVBoxLayout()
         controlLayout = QHBoxLayout()
         utilsLayout = QHBoxLayout()
 
         self.statusLabel = QLabel()
-        self.statusLabel.setFixedHeight(50)
+        self.statusLabel.setFixedHeight(60)
         layout.addWidget(self.statusLabel)
         
         self.positionSlider = QSlider(orientation=Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.valueChanged.connect(self.seek_position)
-        self.positionSlider.setStyleSheet(self.getStyle('slider'))
+        self.positionSlider.setStyleSheet(self.get_style_file('slider'))
         layout.addWidget(self.positionSlider)
+        
+        self.volumeSlider = QSlider(orientation=Qt.Horizontal)
+        self.volumeSlider.setRange(0, 100)
+        self.volumeSlider.setValue(self.settings.get('def_volume'))
+        # self.volumeSlider.setStyleSheet(self.get_style_file('slider'))
+        self.volumeSlider.valueChanged.connect(self.change_volume)
+        layout.addWidget(self.volumeSlider)
         
         self.settingsButton = QPushButton()
         self.settingsButton.setIcon(self.settings_icon)
         self.settingsButton.clicked.connect(self.open_folder)
-        utilsLayout.addWidget(self.settingsButton)
+        utilsLayout.addWidget(self.settingsButton, stretch=1)
 
         self.openFolderButton = QPushButton()
         self.openFolderButton.setIcon(self.folder_icon)
         self.openFolderButton.clicked.connect(self.open_folder)
-        utilsLayout.addWidget(self.openFolderButton)
+        utilsLayout.addWidget(self.openFolderButton, stretch=4)
 
         self.prevButton = QPushButton()
         self.prevButton.setIcon(self.prev_icon)
@@ -103,21 +110,13 @@ class MainWindow(QWidget):
         self.windowDownloader = QPushButton()
         self.windowDownloader.setIcon(self.downloader_icon)
         # self.windowDownloader.clicked.connect(self.next_song)
-        utilsLayout.addWidget(self.windowDownloader)
+        utilsLayout.addWidget(self.windowDownloader, stretch=1)
 
         layout.addLayout(controlLayout)
         layout.addLayout(utilsLayout)
 
-        self.volumeSlider = QSlider(orientation=Qt.Horizontal)
-        self.volumeSlider.setRange(0, 100)
-        self.volumeSlider.setValue(self.settings.get('def_volume'))
-        # self.volumeSlider.setStyleSheet(self.getStyle('slider'))
-        self.volumeSlider.valueChanged.connect(self.change_volume)
-        layout.addWidget(self.volumeSlider)
-
-
         self.setLayout(layout)
-        self.enabledWidget(False)
+        self.enabled_widget(False)
         
         self.timer = QTimer()
         self.timer.setInterval(self.settings.get('interval_slider'))  # Update every 1 second
@@ -126,16 +125,16 @@ class MainWindow(QWidget):
         
 
     @staticmethod
-    def getStyle(nameStyle:str)->dict[str]:
+    def get_style_file(nameStyle:str)->dict[str]:
         with open(STYLES_PATH + nameStyle + '.css', 'r') as styleFile:
             return styleFile.read()
     
 
-    def printInfoLabel(self, text):
+    def print_label(self, text):
         self.statusLabel.setText(text)
 
 
-    def enabledWidget(self, enabled: bool):
+    def enabled_widget(self, enabled: bool):
         if self.playing:
             self.playStopButton.setEnabled(enabled)
             self.prevButton.setEnabled(enabled)
@@ -150,13 +149,13 @@ class MainWindow(QWidget):
         if self.folder_path:
             self.music_files = [f for f in os.listdir(self.folder_path) if f.endswith('.mp3') or f.endswith('.wav')]
             if self.music_files:
-                self.enabledWidget(True)
+                self.enabled_widget(True)
                 self.current_song = 0
                 self.play_song(self.music_files[self.current_song])
                 self.settings.set('path_to_music', self.folder_path)
                 self.settings.set('current_song', self.current_song)
             else:
-                self.printInfoLabel(" No music files found in the folder.")
+                self.print_label(" No music files found in the folder.")
 
 
     def play_song(self, filename):
@@ -184,6 +183,11 @@ class MainWindow(QWidget):
             self.playing = True
 
 
+    def mediaStateChanged(self, state):
+        if state == QMediaPlayer.StoppedState:
+            self.next_song()
+            time.sleep(0.1)
+
 
     def prev_song(self):
         if len(self.music_files) > 0:
@@ -205,13 +209,13 @@ class MainWindow(QWidget):
         self.media_player.setVolume(value)
 
 
-    def printMediaData(self):
+    def print_media_data(self):
         if self.media_player.mediaStatus() == 6:
             if self.media_player.isMetaDataAvailable():
                 title = self.media_player.metaData("Title")
                 author = self.media_player.metaData("Author")
 
-                self.printInfoLabel(" {}\n {}".format(title, author))
+                self.print_label(" {}\n {}".format(title, author))
 
                 print(f"Title: {title}, Author: {author}")
             else:
@@ -238,7 +242,4 @@ class MainWindow(QWidget):
             self.media_player.setPosition(position)
             
             
-    def mediaStateChanged(self, state):
-        if state == QMediaPlayer.StoppedState:
-            self.next_song()
-            time.sleep(0.1)
+    
