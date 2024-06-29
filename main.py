@@ -6,10 +6,10 @@ from os.path import dirname
 
 if __name__ == "__main__":
     
-    if Settings('config\\settings.toml').get('theme') == 'dark':
+    if (Settings('config\\settings.toml').get('theme') == 'dark'):
         sysArgv += ['-platform', 'windows:darkmode=1']
-    else:
-        sysArgv += ['-platform', 'windows:darkmode=0']
+        
+    sysArgv += ['-platform']
     
     app = QApplication(sysArgv)
     player = MainWindow('config\\settings.toml')

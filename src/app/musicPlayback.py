@@ -18,3 +18,4 @@ class MediaPlaybackThread(threading.Thread):
         content = QMediaContent(url)
         self.media_player.setMedia(content)
         self.media_player.play()
+        

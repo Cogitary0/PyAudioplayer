@@ -32,9 +32,7 @@ class MainWindow(QWidget):
         self.folder_icon = QIcon(ICONS_PATH + 'folderOpen.png')
         self.downloader_icon = QIcon(ICONS_PATH + 'downloader.png')
         self.settings_icon = QIcon(ICONS_PATH + 'settings.png')
-
-        with open(STYLES_PATH + "styles.css", 'r') as styleFile:
-            self.setStyleSheet(styleFile.read())
+        self.setStyleSheet(self.getStyle('styles'))
 
         self.media_player = QMediaPlayer(None, QMediaPlayer.StreamPlayback)
         self.media_player.mediaStatusChanged.connect(self.printMediaData)
@@ -44,6 +42,7 @@ class MainWindow(QWidget):
         self.folder_path = self.settings.get('path_to_music')
         self.current_song = self.settings.get('current_song')
         self.playing = False
+        self.slider_dragging = False
         self.music_files = []
 
         self.initUI()
@@ -58,6 +57,8 @@ class MainWindow(QWidget):
         else:
             self.printInfoLabel(" No metadata available")
 
+    
+
     def initUI(self):
         layout = QVBoxLayout()
         controlLayout = QHBoxLayout()
@@ -70,8 +71,7 @@ class MainWindow(QWidget):
         self.positionSlider = QSlider(orientation=Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.valueChanged.connect(self.seek_position)
-        with open(STYLES_PATH + 'slider.css', 'r') as stileSlider:
-            self.positionSlider.setStyleSheet(stileSlider.read())
+        self.positionSlider.setStyleSheet(self.getStyle('slider'))
         layout.addWidget(self.positionSlider)
         
         self.settingsButton = QPushButton()
@@ -101,7 +101,6 @@ class MainWindow(QWidget):
 
         self.windowDownloader = QPushButton()
         self.windowDownloader.setIcon(self.downloader_icon)
-        # self.windowDownloader.clicked.connect(self.next_song)
         utilsLayout.addWidget(self.windowDownloader)
 
         layout.addLayout(controlLayout)
@@ -123,9 +122,14 @@ class MainWindow(QWidget):
         self.timer.start()
         
 
+    @staticmethod
+    def getStyle(nameStyle)->str:
+        with open(STYLES_PATH + nameStyle + '.css', 'r') as styleFile:
+            return styleFile.read()
+    
+
     def printInfoLabel(self, text):
         self.statusLabel.setText(text)
-
 
 
     def enabledWidget(self, enabled: bool):
@@ -162,6 +166,7 @@ class MainWindow(QWidget):
         thread.start()
         self.playStopButton.setIcon(self.stop_icon)
         self.playing = True
+
 
     def play_stop_song(self):
         if self.playing:
@@ -210,17 +215,23 @@ class MainWindow(QWidget):
 
 
     def update_position(self, position):
-        if self.playing:
+        if not self.slider_dragging:
             self.positionSlider.setValue(position)
-
-    def update_duration(self, duration):
-        self.positionSlider.setRange(0, duration)
-
-    def update_position_slider(self):
-        position = self.media_player.position()
-        self.positionSlider.setValue(position)
-
 
     def seek_position(self, position):
         if self.media_player.state() == QMediaPlayer.PlayingState:
             self.media_player.setPosition(position)
+
+    def positionSlider_dragStarted(self):
+        self.slider_dragging = True
+
+    def positionSlider_dragEnded(self):
+        self.slider_dragging = False
+        self.seek_position(self.positionSlider.value())
+    
+    def update_position_slider(self):
+        position = self.media_player.position()
+        self.positionSlider.setValue(position)    
+    
+    def update_duration(self, duration):
+        self.positionSlider.setRange(0, duration)
