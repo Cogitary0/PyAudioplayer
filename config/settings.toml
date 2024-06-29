@@ -5,3 +5,4 @@ win_width = 300
 win_height = 240
 path_to_music = ''
 current_song = 0
+interval_slider = 25

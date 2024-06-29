@@ -1,6 +1,7 @@
 import sys
 import os
 import threading
+import time
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QPalette, QIcon
@@ -38,11 +39,11 @@ class MainWindow(QWidget):
         self.media_player.mediaStatusChanged.connect(self.printMediaData)
         self.media_player.positionChanged.connect(self.update_position)
         self.media_player.durationChanged.connect(self.update_duration)
+        self.media_player.stateChanged.connect(self.mediaStateChanged)
 
         self.folder_path = self.settings.get('path_to_music')
         self.current_song = self.settings.get('current_song')
         self.playing = False
-        self.slider_dragging = False
         self.music_files = []
 
         self.initUI()
@@ -101,6 +102,7 @@ class MainWindow(QWidget):
 
         self.windowDownloader = QPushButton()
         self.windowDownloader.setIcon(self.downloader_icon)
+        # self.windowDownloader.clicked.connect(self.next_song)
         utilsLayout.addWidget(self.windowDownloader)
 
         layout.addLayout(controlLayout)
@@ -109,6 +111,7 @@ class MainWindow(QWidget):
         self.volumeSlider = QSlider(orientation=Qt.Horizontal)
         self.volumeSlider.setRange(0, 100)
         self.volumeSlider.setValue(self.settings.get('def_volume'))
+        # self.volumeSlider.setStyleSheet(self.getStyle('slider'))
         self.volumeSlider.valueChanged.connect(self.change_volume)
         layout.addWidget(self.volumeSlider)
 
@@ -117,13 +120,13 @@ class MainWindow(QWidget):
         self.enabledWidget(False)
         
         self.timer = QTimer()
-        self.timer.setInterval(50)  # Update every 1 second
+        self.timer.setInterval(self.settings.get('interval_slider'))  # Update every 1 second
         self.timer.timeout.connect(self.update_position_slider)
         self.timer.start()
         
 
     @staticmethod
-    def getStyle(nameStyle)->str:
+    def getStyle(nameStyle:str)->dict[str]:
         with open(STYLES_PATH + nameStyle + '.css', 'r') as styleFile:
             return styleFile.read()
     
@@ -159,10 +162,12 @@ class MainWindow(QWidget):
     def play_song(self, filename):
         if self.playing:
             self.media_player.stop()
+            
+        self.media_player.setVolume(self.volumeSlider.value())
         thread = MediaPlaybackThread(self.media_player, 
-                                    self.folder_path, 
-                                    filename, 
-                                    self.positionSlider)
+                                     self.folder_path, 
+                                     filename, 
+                                     self.positionSlider)
         thread.start()
         self.playStopButton.setIcon(self.stop_icon)
         self.playing = True
@@ -215,23 +220,25 @@ class MainWindow(QWidget):
 
 
     def update_position(self, position):
-        if not self.slider_dragging:
+        if self.playing:
             self.positionSlider.setValue(position)
+
+
+    def update_duration(self, duration):
+        self.positionSlider.setRange(0, duration)
+
+
+    def update_position_slider(self):
+        position = self.media_player.position()
+        self.positionSlider.setValue(position)
+
 
     def seek_position(self, position):
         if self.media_player.state() == QMediaPlayer.PlayingState:
             self.media_player.setPosition(position)
-
-    def positionSlider_dragStarted(self):
-        self.slider_dragging = True
-
-    def positionSlider_dragEnded(self):
-        self.slider_dragging = False
-        self.seek_position(self.positionSlider.value())
-    
-    def update_position_slider(self):
-        position = self.media_player.position()
-        self.positionSlider.setValue(position)    
-    
-    def update_duration(self, duration):
-        self.positionSlider.setRange(0, duration)
+            
+            
+    def mediaStateChanged(self, state):
+        if state == QMediaPlayer.StoppedState:
+            self.next_song()
+            time.sleep(0.1)
