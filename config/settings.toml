@@ -1,0 +1,5 @@
+language = "en"
+theme = "light"
+def_volume = 50
+win_width = 300
+win_height = 240
