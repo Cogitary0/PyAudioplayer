@@ -1,19 +1,26 @@
-import sys
 import os
-import threading
 import time
+
+from PyQt5.QtCore import QUrl, QCoreApplication, Qt,  QSize, QTimer
+from PyQt5.QtGui import QColor, QPalette,  QIcon, QKeySequence
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize, QTimer
-from PyQt5.QtGui import QColor, QPalette, QIcon
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QSlider, QHBoxLayout, QProgressBar
 from src.app.musicPlayback import MediaPlaybackThread
 from src.app.settingsWindow import SettingsWindow
 from src.app.downloaderWindow import DownloaderWindow
 from src.utils.parse import Settings
+from PyQt5.QtWidgets import (QApplication, 
+                             QWidget, 
+                             QVBoxLayout, 
+                             QPushButton, 
+                             QFileDialog, 
+                             QLabel, QProgressBar,
+                             QHBoxLayout,
+                             QShortcut)
 
 
 ICONS_PATH = 'src\\assets\\icons\\'
 STYLES_PATH = 'src\\assets\\css\\'
+
 
 class MainWindow(QWidget):
     
@@ -39,12 +46,13 @@ class MainWindow(QWidget):
         self.media_player.mediaStatusChanged.connect(self.print_media_data)
         self.media_player.positionChanged.connect(self.update_position)
         self.media_player.durationChanged.connect(self.update_duration)
-        self.media_player.stateChanged.connect(self.mediaStateChanged)
+        self.media_player.stateChanged.connect(self.media_state_changed)
 
         self.folder_path = self.settings.get('path_to_music')
         self.current_song = self.settings.get('current_song')
         self.playing = False
         self.music_files = []
+        self.audio_trigger = True
 
         self.init_ui()
 
@@ -54,7 +62,7 @@ class MainWindow(QWidget):
                 self.enabled_widget(True)
                 self.play_song(self.music_files[self.current_song])
             else:
-                self.print_label(" No music files found in the folder.")
+                self.print_label(" No music files found in the folder")
         else:
             self.print_label(" No metadata available")
 
@@ -69,18 +77,25 @@ class MainWindow(QWidget):
         self.statusLabel.setFixedHeight(60)
         layout.addWidget(self.statusLabel)
         
-        self.positionSlider = QSlider(orientation=Qt.Horizontal)
-        self.positionSlider.setRange(0, 0)
-        self.positionSlider.valueChanged.connect(self.seek_position)
-        self.positionSlider.setStyleSheet(self.get_style_file('slider'))
-        layout.addWidget(self.positionSlider)
+        self.positionProgressBar = QProgressBar()
+        self.positionProgressBar.setRange(0, 0)
+        self.positionProgressBar.setValue(0)
+        self.positionProgressBar.setTextVisible(False)
+        self.position_plus_shortcut = QShortcut(QKeySequence(self.settings.get('btn_music_plus')), self)
+        self.position_minus_shortcut = QShortcut(QKeySequence(self.settings.get('btn_music_minus')), self)
+        self.position_plus_shortcut.activated.connect(self.position_plus)
+        self.position_minus_shortcut.activated.connect(self.position_minus)
+        layout.addWidget(self.positionProgressBar)
         
-        self.volumeSlider = QSlider(orientation=Qt.Horizontal)
-        self.volumeSlider.setRange(0, 100)
-        self.volumeSlider.setValue(self.settings.get('def_volume'))
-        # self.volumeSlider.setStyleSheet(self.get_style_file('slider'))
-        self.volumeSlider.valueChanged.connect(self.change_volume)
-        layout.addWidget(self.volumeSlider)
+        self.volumeProgressBar = QProgressBar()
+        self.volumeProgressBar.setRange(0, 100)
+        self.volumeProgressBar.setValue(self.settings.get('def_volume'))
+        self.volumeProgressBar.setTextVisible(False)
+        self.volume_up_shortcut = QShortcut(QKeySequence(self.settings.get('btn_volume_up')), self)
+        self.volume_down_shortcut = QShortcut(QKeySequence(self.settings.get('btn_volume_down')), self)
+        self.volume_up_shortcut.activated.connect(self.volume_up)
+        self.volume_down_shortcut.activated.connect(self.volume_down)
+        layout.addWidget(self.volumeProgressBar)
         
         self.settingsButton = QPushButton()
         self.settingsButton.setIcon(self.settings_icon)
@@ -119,7 +134,7 @@ class MainWindow(QWidget):
         self.enabled_widget(False)
         
         self.timer = QTimer()
-        self.timer.setInterval(self.settings.get('interval_slider'))  # Update every 1 second
+        self.timer.setInterval(self.settings.get('interval_update_music'))
         self.timer.timeout.connect(self.update_position_slider)
         self.timer.start()
         
@@ -139,7 +154,7 @@ class MainWindow(QWidget):
             self.playStopButton.setEnabled(enabled)
             self.prevButton.setEnabled(enabled)
             self.nextButton.setEnabled(enabled)
-            self.positionSlider.setEnabled(enabled)
+            self.positionProgressBar.setEnabled(enabled)
 
 
     def open_folder(self):
@@ -162,11 +177,12 @@ class MainWindow(QWidget):
         if self.playing:
             self.media_player.stop()
             
-        self.media_player.setVolume(self.volumeSlider.value())
+        self.media_player.setVolume(self.volumeProgressBar.value())
+        
         thread = MediaPlaybackThread(self.media_player, 
                                      self.folder_path, 
                                      filename, 
-                                     self.positionSlider)
+                                     self.positionProgressBar)
         thread.start()
         self.playStopButton.setIcon(self.stop_icon)
         self.playing = True
@@ -183,8 +199,8 @@ class MainWindow(QWidget):
             self.playing = True
 
 
-    def mediaStateChanged(self, state):
-        if state == QMediaPlayer.StoppedState:
+    def media_state_changed(self, state):
+        if state == QMediaPlayer.StoppedState and self.media_player.mediaStatus() == QMediaPlayer.EndOfMedia:
             self.next_song()
             time.sleep(0.1)
 
@@ -207,6 +223,7 @@ class MainWindow(QWidget):
 
     def change_volume(self, value):
         self.media_player.setVolume(value)
+        self.volumeProgressBar.setValue(value)
 
 
     def print_media_data(self):
@@ -219,27 +236,50 @@ class MainWindow(QWidget):
 
                 print(f"Title: {title}, Author: {author}")
             else:
-                self.printDataLabel(" No metadata available")
+                self.print_label(" No metadata available")
                 print("no metaData available")
 
 
     def update_position(self, position):
         if self.playing:
-            self.positionSlider.setValue(position)
+            self.positionProgressBar.setValue(position)
 
 
     def update_duration(self, duration):
-        self.positionSlider.setRange(0, duration)
+        self.positionProgressBar.setRange(0, duration)
 
 
     def update_position_slider(self):
         position = self.media_player.position()
-        self.positionSlider.setValue(position)
+        self.positionProgressBar.setValue(position)
+       
+        
+    def volume_up(self):
+        current_volume = self.volumeProgressBar.value()
+        if current_volume < 100:
+            self.volumeProgressBar.setValue(current_volume + 1)
+            self.media_player.setVolume(current_volume + 1)
 
 
-    def seek_position(self, position):
-        if self.media_player.state() == QMediaPlayer.PlayingState:
-            self.media_player.setPosition(position)
+    def volume_down(self):
+        current_volume = self.volumeProgressBar.value()
+        if current_volume > 0:
+            self.volumeProgressBar.setValue(current_volume - 1)
+            self.media_player.setVolume(current_volume - 1)
             
-            
-    
+                
+    def position_plus(self):
+        if self.playing:
+            self.media_player.pause()
+            position = self.media_player.position()
+            self.media_player.setPosition(position + self.settings.get('interval_move_music')) 
+            time.sleep(0.1)
+            self.media_player.play()
+
+
+    def position_minus(self):
+        if self.playing:
+            self.media_player.pause()
+            position = self.media_player.position()
+            self.media_player.setPosition(position - self.settings.get('interval_move_music'))
+            self.media_player.play()
