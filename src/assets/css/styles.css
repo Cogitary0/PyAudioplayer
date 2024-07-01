@@ -16,7 +16,7 @@ QPushButton {
     color: #ffffff;
     width: 32px;
     height: 32px;
-    icon-size: 24px;
+    icon-size: 26px;
 }
 
 QPushButton:hover {
@@ -24,7 +24,8 @@ QPushButton:hover {
 }
 
 QPushButton:pressed {
-    background-color: #555;
+    /* background-color: #555; */
+    background-color: #395fc7;
     padding: 4px; 
     font-size: 12px; 
 }
@@ -64,9 +65,12 @@ QProgressBar {
     border-radius: 5px;
     padding: 1px;
     background-color: #141414;
-    height: 10px;
+    height: 4px;
 }
 
 QProgressBar::chunk {
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #2f2f2f, stop: 1 #8f8f8f);
+    /* background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #141414, stop: 1 #4e4e4e); */
+    background-color: #395fc7;
+    width: 1px;
+    height: 10px;
 }

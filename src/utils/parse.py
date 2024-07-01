@@ -17,11 +17,11 @@ class Settings:
             tDump(self.data, f)
 
 
-    def get(self, key) -> dict[str]:
+    def get(self, key:str) -> dict[str]:
         return self.data.get(key)
     
     
-    def set(self, key, value):
+    def set(self, key:str, value:int|str):
         self.data[key] = value
         self.save()
         return 
