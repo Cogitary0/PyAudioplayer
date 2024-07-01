@@ -18,83 +18,74 @@ class SettingsWindow(QWidget):
 
         self.settings = Settings('config\\settings.toml')
         self.setStyleSheet(self.get_style_file('settings'))
+        # self.setFixedSize(QSize(320,230))
+        # self.setFixedHeight(230)
+        
+        self.settings_fields = [
+            {"label": "Interval to update music (ms):", 
+             "edit": QLineEdit(str(self.settings.get('interval_update_music'))), 
+             "stretch": 1},
+            
+            {"label": "Interval to move music (ms):", 
+             "edit": QLineEdit(str(self.settings.get('interval_move_music'))), 
+             "stretch": 1},
+            
+            {"label": "Start volume:", 
+             "edit": QLineEdit(str(self.settings.get('def_volume'))), 
+             "stretch": 1},
+            
+            {"label": "Volume [+/-] button:", 
+             "edit": QLineEdit(self.settings.get('btn_volume_up')), 
+             "stretch": 1, 
+             "second_edit": QLineEdit(self.settings.get('btn_volume_down'))},
+            
+            {"label": "Music [+/-] button:", 
+             "edit": QLineEdit(self.settings.get('btn_music_plus')), 
+             "stretch": 1, 
+             "second_edit": QLineEdit(self.settings.get('btn_music_minus'))},
+        ]
+        
         self.init_ui()
+        
+        
 
     def init_ui(self):
+        
         layout = QVBoxLayout()
-        intervalUpdateMusicLayout = QHBoxLayout()
-        intervalMoveMusicLayout = QHBoxLayout()
-        volumeUpEditLayout = QHBoxLayout()
-        voumeUpLabelLayout = QHBoxLayout()
-        volumeDownEditLayout = QHBoxLayout()
-        volumeDownLabelLayout = QHBoxLayout()
-        musicPlusEditLayout = QHBoxLayout()
-        musicPlayLabelLayout = QHBoxLayout()
-        musicMinusEditLayout = QHBoxLayout()
-        musicMinusLabelLayout =QHBoxLayout()
-        
-    
-        self.intervalUpdateMusicLabel = QLabel("Interval to update music (ms):")
-        self.intervalUpdateMusicEdit = QLineEdit(str(self.settings.get('interval_update_music')))
 
-        self.intervalMoveMusicLabel = QLabel("Interval to move music (ms):")
-        self.intervalMoveMusicEdit = QLineEdit(str(self.settings.get('interval_move_music')))
+        for field in self.settings_fields:
+            
+            hlayout = QHBoxLayout()
+            label = QLabel(field["label"])
+            hlayout.addWidget(label, stretch=3)
+            hlayout.addWidget(field["edit"], stretch=field["stretch"])
+            
+            if "second_edit" in field:
+                hlayout.addWidget(field["second_edit"], stretch=field["stretch"])
+                
+            layout.addLayout(hlayout)
 
-
-        self.volumeUpLabel = QLabel("Volume up shortcut:")
-        self.volumeUpEdit = QLineEdit(self.settings.get('btn_volume_up'))
-
-
-        self.volumeDownLabel = QLabel("Volume down shortcut:")
-        self.volumeDownEdit = QLineEdit(self.settings.get('btn_volume_down'))
-
-
-        self.musicPlusLabel = QLabel("Music plus shortcut:")
-        self.musicPlusEdit = QLineEdit(self.settings.get('btn_music_plus'))
-
-        self.musicMinusLabel = QLabel("Music minus shortcut:")
-        self.musicMinusEdit = QLineEdit(self.settings.get('btn_music_minus'))
-
-        self.saveButton = QPushButton("Save")
-        self.saveButton.clicked.connect(self.saveSettings)
-        
-        intervalUpdateMusicLayout.addWidget(self.intervalUpdateMusicLabel, stretch=3)
-        intervalUpdateMusicLayout.addWidget(self.intervalUpdateMusicEdit, stretch=1)
-        intervalMoveMusicLayout.addWidget(self.intervalMoveMusicLabel, stretch=3)
-        intervalMoveMusicLayout.addWidget(self.intervalMoveMusicEdit, stretch=1)
-        voumeUpLabelLayout.addWidget(self.volumeDownLabel, stretch=3)
-        volumeUpEditLayout.addWidget(self.volumeUpEdit, stretch=1)
-        volumeDownLabelLayout.addWidget(self.volumeDownLabel, stretch=3)
-        volumeDownEditLayout.addWidget(self.volumeDownEdit, stretch=1)
-        musicPlayLabelLayout.addWidget(self.musicPlusLabel, stretch=3)
-        musicPlusEditLayout.addWidget(self.musicPlusEdit, stretch=1)
-        musicMinusLabelLayout.addWidget(self.musicMinusLabel, stretch=3)
-        musicMinusEditLayout.addWidget(self.musicMinusEdit, stretch=1)
-        
-        layout.addLayout(intervalUpdateMusicLayout)
-        layout.addLayout(intervalMoveMusicLayout)
-        layout.addLayout(volumeUpEditLayout)
-        layout.addLayout(voumeUpLabelLayout)
-        layout.addLayout(volumeDownEditLayout)
-        layout.addLayout(volumeDownLabelLayout)
-        layout.addLayout(musicPlusEditLayout)
-        layout.addLayout(musicPlayLabelLayout)
-        layout.addLayout(musicMinusEditLayout)
-        layout.addLayout(musicMinusLabelLayout)
-
-        layout.addWidget(self.saveButton)
+        save_button = QPushButton("Save")
+        save_button.clicked.connect(self.saveSettings)
+        layout.addWidget(save_button)
 
         self.setLayout(layout)
 
     def saveSettings(self):
-        self.settings.set('interval_update_music', int(self.intervalUpdateMusicEdit.text()))
-        self.settings.set('interval_move_music', int(self.intervalMoveMusicEdit.text()))
-        self.settings.set('btn_volume_up', self.volumeUpEdit.text())
-        self.settings.set('btn_volume_down', self.volumeDownEdit.text())
-        self.settings.set('btn_music_plus', self.musicPlusEdit.text())
-        self.settings.set('btn_music_minus', self.musicMinusEdit.text())
+        for field in self.settings_fields:
+            if field["label"] == "Interval to update music (ms):":
+                self.settings.set('interval_update_music', int(field["edit"].text()))
+            elif field["label"] == "Interval to move music (ms):":
+                self.settings.set('interval_move_music', int(field["edit"].text()))
+            elif field["label"] == "Start volume:":
+                self.settings.set('def_volume', int(field["edit"].text()))
+            elif field["label"] == "Volume [+/-] button:":
+                self.settings.set('btn_volume_up', field["edit"].text())
+                self.settings.set('btn_volume_down', field["second_edit"].text())
+            elif field["label"] == "Music [+/-] button:":
+                self.settings.set('btn_music_plus', field["edit"].text())
+                self.settings.set('btn_music_minus', field["second_edit"].text())
         self.close()
-        
 
     @staticmethod
     def get_style_file(nameStyle:str)->dict[str]:

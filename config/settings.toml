@@ -1,12 +1,12 @@
 language = "en"
 theme = "dark"
-def_volume = 22
+def_volume = 25
 win_width = 300
 win_height = 240
 interval_update_music = 25
 interval_volume = 10
 interval_move_music = 1000
-path_to_music = ''
+path_to_music = ""
 current_song = 0
 btn_volume_up = "up"
 btn_volume_down = "down"

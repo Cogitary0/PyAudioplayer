@@ -28,6 +28,7 @@ QPushButton:pressed {
     background-color: #395fc7;
     padding: 4px; 
     font-size: 12px; 
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 
