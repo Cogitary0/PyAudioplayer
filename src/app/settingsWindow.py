@@ -18,39 +18,32 @@ class SettingsWindow(QWidget):
 
         self.settings = Settings('config\\settings.toml')
         self.setStyleSheet(self.get_style_file('settings'))
-        # self.setFixedSize(QSize(320,230))
-        # self.setFixedHeight(230)
-        
+
         self.settings_fields = [
             {"label": "Interval to update music (ms):", 
-             "edit": QLineEdit(str(self.settings.get('interval_update_music'))), 
-             "stretch": 1},
+             "key": 'interval_update_music', 
+             "type": int},
             
             {"label": "Interval to move music (ms):", 
-             "edit": QLineEdit(str(self.settings.get('interval_move_music'))), 
-             "stretch": 1},
+             "key": 'interval_move_music', 
+             "type": int},
             
             {"label": "Start volume:", 
-             "edit": QLineEdit(str(self.settings.get('def_volume'))), 
-             "stretch": 1},
+             "key": 'def_volume', 
+             "type": int},
             
             {"label": "Volume [+/-] button:", 
-             "edit": QLineEdit(self.settings.get('btn_volume_up')), 
-             "stretch": 1, 
-             "second_edit": QLineEdit(self.settings.get('btn_volume_down'))},
-            
+             "key": ('btn_volume_up', 'btn_volume_down'), 
+             "type": str},
+
             {"label": "Music [+/-] button:", 
-             "edit": QLineEdit(self.settings.get('btn_music_plus')), 
-             "stretch": 1, 
-             "second_edit": QLineEdit(self.settings.get('btn_music_minus'))},
+             "key": ('btn_music_plus', 'btn_music_minus'), 
+             "type": str},
         ]
-        
+
         self.init_ui()
-        
-        
 
     def init_ui(self):
-        
         layout = QVBoxLayout()
 
         for field in self.settings_fields:
@@ -58,10 +51,16 @@ class SettingsWindow(QWidget):
             hlayout = QHBoxLayout()
             label = QLabel(field["label"])
             hlayout.addWidget(label, stretch=3)
-            hlayout.addWidget(field["edit"], stretch=field["stretch"])
+            edit = QLineEdit(str(self.settings.get(field["key"] if not isinstance(field["key"], tuple) else field["key"][0])))
+            hlayout.addWidget(edit, stretch=1)
             
-            if "second_edit" in field:
-                hlayout.addWidget(field["second_edit"], stretch=field["stretch"])
+            if isinstance(field["key"], tuple):
+                edit2 = QLineEdit(str(self.settings.get(field["key"][1])))
+                hlayout.addWidget(edit2, stretch=1)
+                self.settings_fields[self.settings_fields.index(field)]["edit"] = (edit, edit2)
+                
+            else:
+                self.settings_fields[self.settings_fields.index(field)]["edit"] = edit
                 
             layout.addLayout(hlayout)
 
@@ -73,18 +72,11 @@ class SettingsWindow(QWidget):
 
     def saveSettings(self):
         for field in self.settings_fields:
-            if field["label"] == "Interval to update music (ms):":
-                self.settings.set('interval_update_music', int(field["edit"].text()))
-            elif field["label"] == "Interval to move music (ms):":
-                self.settings.set('interval_move_music', int(field["edit"].text()))
-            elif field["label"] == "Start volume:":
-                self.settings.set('def_volume', int(field["edit"].text()))
-            elif field["label"] == "Volume [+/-] button:":
-                self.settings.set('btn_volume_up', field["edit"].text())
-                self.settings.set('btn_volume_down', field["second_edit"].text())
-            elif field["label"] == "Music [+/-] button:":
-                self.settings.set('btn_music_plus', field["edit"].text())
-                self.settings.set('btn_music_minus', field["second_edit"].text())
+            if isinstance(field["key"], tuple):
+                self.settings.set(field["key"][0], field["edit"][0].text())
+                self.settings.set(field["key"][1], field["edit"][1].text())
+            else:
+                self.settings.set(field["key"], field["type"](field["edit"].text()))
         self.close()
 
     @staticmethod
