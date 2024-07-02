@@ -2,12 +2,12 @@ from pytube import YouTube
 from datetime import datetime
 
 class Downloader:
-    def __init__(self, url):
+    def __init__(self, url:str, path_save_audio:str, path_save_video:str = None):
         self.url = url
         self.youtube = YouTube(self.url)
         self.title = "".join(str(self.youtube.title).split())
-        self.filepathAudio = 'downloads\\audio'
-        self.filepathVideo = 'downloads\\video'
+        self.filepathAudio = path_save_audio
+        self.filepathVideo = path_save_video
     
     
     def downloadAudio(self)->str:

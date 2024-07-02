@@ -6,16 +6,14 @@ from PyQt5.QtGui import QColor, QPalette,  QIcon, QKeySequence
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from src.app.musicPlayback import MediaPlaybackThread
 from src.app.settingsWindow import SettingsWindow
-# from src.app.downloaderWindow import DownloaderWindow
+from src.app.downloaderWindow import DownloaderWindow
 from src.utils.parse import Settings
-from PyQt5.QtWidgets import (QApplication, 
-                             QWidget, 
+from PyQt5.QtWidgets import (QWidget, 
                              QVBoxLayout, 
                              QPushButton, 
                              QFileDialog, 
                              QLabel, QProgressBar,
-                             QHBoxLayout,
-                             QShortcut)
+                             QHBoxLayout)
 
 
 ICONS_PATH = 'src\\assets\\icons\\'
@@ -124,7 +122,7 @@ class MainWindow(QWidget):
 
         self.windowDownloader = QPushButton()
         self.windowDownloader.setIcon(self.downloader_icon)
-        # self.windowDownloader.clicked.connect(self.next_song)
+        self.windowDownloader.clicked.connect(self.open_downloader)
         utilsLayout.addWidget(self.windowDownloader, stretch=1)
 
         layout.addLayout(controlLayout)
@@ -132,6 +130,7 @@ class MainWindow(QWidget):
 
         self.setLayout(layout)
         self.enabled_widget(False)
+        self.play_stop_song()
         
         self.timer = QTimer()
         self.timer.setInterval(self.settings.get('interval_update_music'))
@@ -161,18 +160,23 @@ class MainWindow(QWidget):
     def open_folder(self):
         self.folder_path = QFileDialog.getExistingDirectory(self, "Open Folder")
         if self.folder_path:
-            self.music_files = [f for f in os.listdir(self.folder_path) if f.endswith('.mp3') or f.endswith('.wav')]
-            if self.music_files:
-                self.enabled_widget(True)
-                self.current_song = 0
-                self.play_song(self.music_files[self.current_song])
-                self.settings.set('path_to_music', self.folder_path)
-                self.settings.set('current_song', self.current_song)
-            else:
-                self.print_label(" No music files found in the folder.")
+            self.set_music()
+            
+            
+    def set_music(self):
+        self.music_files = [f for f in os.listdir(self.folder_path) if f.endswith('.mp3') or f.endswith('.wav')]
+        if self.music_files:
+            self.enabled_widget(True)
+            self.current_song = 0
+            self.play_song(self.music_files[self.current_song])
+            self.settings.set('path_to_music', self.folder_path)
+            self.settings.set('current_song', self.current_song)
+            self.settings.set("count_musics", len(self.music_files))
+        else:
+            self.print_label(" No music files found in the folder.")
 
 
-    def play_song(self, filename):
+    def play_song(self, filename):    
         if self.playing:
             self.media_player.stop()
             
@@ -273,7 +277,6 @@ class MainWindow(QWidget):
             position = self.media_player.position()
             self.media_player.pause()
             self.media_player.setPosition(position + self.settings.get('interval_move_music')) 
-            # time.sleep(0.1)
             self.media_player.play()
 
 
@@ -286,5 +289,10 @@ class MainWindow(QWidget):
             
             
     def open_settings(self):
-        self.settings_window = SettingsWindow()
+        self.settings_window = SettingsWindow(self.get_style_file('settings'))
         self.settings_window.show()
+            
+    def open_downloader(self):
+        self.downloader_window = DownloaderWindow(self.get_style_file('styles'), self.folder_path)
+        self.downloader_window.destroyed.connect(self.set_music)
+        self.downloader_window.show()
