@@ -1,4 +1,5 @@
-from toml import load as tLoad, dump as tDump
+from toml import (load as tLoad, 
+                  dump as tDump)
 
 class Settings:
     def __init__(self, filename):

@@ -1,10 +1,9 @@
 import os
 import time
-from keyboard import add_hotkey, hook
-from audioplayer import AudioPlayer
-from PyQt5.QtCore import QUrl, QCoreApplication, Qt,  QSize, QTimer
-from PyQt5.QtGui import QColor, QPalette,  QIcon, QKeySequence
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from keyboard import add_hotkey
+from PyQt5.QtCore import QSize, QTimer
+from PyQt5.QtGui import QIcon
+from PyQt5.QtMultimedia import QMediaPlayer
 from src.app.musicPlayback import MediaPlaybackThread
 from src.app.settingsWindow import SettingsWindow
 from src.app.downloaderWindow import DownloaderWindow

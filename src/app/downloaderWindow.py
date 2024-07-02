@@ -1,17 +1,8 @@
-import sys
-import os
-from src.utils.parse import Settings
 from src.utils.downloader import Downloader
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize, QTimer
-from PyQt5.QtGui import QColor, QPalette, QIcon
 from PyQt5.QtWidgets import (QWidget, 
                              QVBoxLayout, 
                              QPushButton, 
-                             QFileDialog, 
                              QLabel,
-                             QHBoxLayout,
-                             QShortcut,
                              QLineEdit)
 
 
