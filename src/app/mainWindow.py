@@ -1,6 +1,7 @@
 import os
 import time
 from keyboard import add_hotkey, hook
+from audioplayer import AudioPlayer
 from PyQt5.QtCore import QUrl, QCoreApplication, Qt,  QSize, QTimer
 from PyQt5.QtGui import QColor, QPalette,  QIcon, QKeySequence
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -17,7 +18,7 @@ from PyQt5.QtWidgets import (QWidget,
 
 
 ICONS_PATH = 'src\\app\\assets\\icons\\'
-STYLES_PATH = 'src\\assets\\stylesheets\\'
+STYLES_PATH = 'src\\app\\assets\\stylesheets\\'
 
 
 class MainWindow(QWidget):
@@ -56,12 +57,7 @@ class MainWindow(QWidget):
         self.init_ui()
 
         if self.folder_path:
-            self.music_files = [f for f in os.listdir(self.folder_path) if f.endswith('.mp3') or f.endswith('.wav')]
-            if self.music_files:
-                self.enabled_widget(True)
-                self.play_song(self.music_files[self.current_song])
-            else:
-                self.print_label(" No music files found in the folder")
+            self.set_music()
         else:
             self.print_label(" No metadata available")
 
@@ -137,13 +133,12 @@ class MainWindow(QWidget):
         self.timer.timeout.connect(self.update_position_slider)
         self.timer.start()
 
-        
 
     @staticmethod
     def get_style_file(nameStyle:str)->dict[str]:
-        with open(STYLES_PATH + nameStyle + '.css', 'r') as styleFile:
+        with open(f'{STYLES_PATH + nameStyle}.css', 'r') as styleFile:
             return styleFile.read()
-    
+
 
     def print_label(self, text):
         self.statusLabel.setText(text)
@@ -232,15 +227,11 @@ class MainWindow(QWidget):
     def print_media_data(self):
         if self.media_player.mediaStatus() == 6:
             if self.media_player.isMetaDataAvailable():
-                title = self.media_player.metaData('Title')
-                author = self.media_player.metaData("Author")
-
-                self.print_label(" {}\n {}".format(title, author))
-
-                print(f"Title: {title}, Author: {author}, Duration: {self.music_duration}")
+                title = self.get_music()
+                # author = self.media_player.metaData('Author')
+                self.print_label(" {}".format(title))
             else:
                 self.print_label(" No metadata available")
-                print("no metaData available")
 
 
     def update_position(self, position):
@@ -287,10 +278,17 @@ class MainWindow(QWidget):
             self.media_player.setPosition(position - self.settings.get('interval_move_music'))
             self.media_player.play()
             
+    
+    def get_music(self):
+        __max_len_text = 28
+        __text = self.music_files[self.current_song].split('.')[0]
+        return __text[:__max_len_text] + '...' if len(__text) > __max_len_text else __text[:__max_len_text]
+            
             
     def open_settings(self):
         self.settings_window = SettingsWindow(self.get_style_file('settings'))
         self.settings_window.show()
+            
             
     def open_downloader(self):
         self.downloader_window = DownloaderWindow(self.get_style_file('styles'), self.folder_path)
