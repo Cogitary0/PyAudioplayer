@@ -1,14 +1,9 @@
 from src.utils.parse import Settings
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtCore import QUrl, QCoreApplication, Qt, QSize, QTimer
-from PyQt5.QtGui import QColor, QPalette, QIcon
 from PyQt5.QtWidgets import (QWidget, 
                              QVBoxLayout, 
                              QPushButton, 
-                             QFileDialog, 
                              QLabel,
                              QHBoxLayout,
-                             QShortcut,
                              QLineEdit,
                              QComboBox)
 
@@ -25,7 +20,7 @@ class SettingsWindow(QWidget):
             {"label": "Language:", 
              "key": 'language', 
              "type": str,
-             "options": ["en", "ru", "fr", "ge", "it"]},
+             "options": ["en", "ru"]},
             
             {"label": "Theme app:", 
              "key": 'theme', 
@@ -40,17 +35,17 @@ class SettingsWindow(QWidget):
              "key": 'interval_move_music', 
              "type": int},
             
-            {"label": "Start volume:", 
+            {"label": "Start volume %:", 
              "key": 'def_volume', 
              "type": int},
             
-            {"label": "Volume [+/-] button:", 
-             "key": ('btn_volume_up', 'btn_volume_down'), 
-             "type": str},
+            # {"label": "Volume [+/-] button:", 
+            #  "key": ('btn_volume_up', 'btn_volume_down'), 
+            #  "type": str},
 
-            {"label": "Music [+/-] button:", 
-             "key": ('btn_music_plus', 'btn_music_minus'), 
-             "type": str},
+            # {"label": "Music [+/-] button:", 
+            #  "key": ('btn_music_plus', 'btn_music_minus'), 
+            #  "type": str},
         ]
 
         self.init_ui()
@@ -96,13 +91,14 @@ class SettingsWindow(QWidget):
     def saveSettings(self):
         for field in self.settings_fields:
             if "options" in field:
-                # self.settings.set(field["key"], field["edit"].currentText())
-                print(field["edit"],1)
-            elif isinstance(field["key"], tuple):
+                self.settings.set(field["key"], field["edit"].currentText())
+                
+            # elif isinstance(field["key"], tuple):
                 # self.settings.set(field["key"], field["edit"].text())
-                # self.settings.set(field["key"], field["edit"].text())
-                print(field["edit"][0],field["edit"][1], 2)
+                # self.settings.set(field["key"], field["edit"][1].text())
+                # print(field["edit"][0],field["edit"][1], 2)
+                
             else:
-                # self.settings.set(field["key"], field["type"](field["edit"].text()))
-                print(field["edit"],3)
+                self.settings.set(field["key"], field["type"](field["edit"].text()))
+                
         self.close()

@@ -78,9 +78,6 @@ class MainWindow(QWidget):
         self.positionProgressBar.setTextVisible(False)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_plus'), self.position_plus)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_minus'), self.position_minus)
-        # self.position_plus_shortcut.activated.connect(self.position_plus)
-        # self.position_minus_shortcut.activated.connect(self.position_minus)
-
         layout.addWidget(self.positionProgressBar)
         
         self.volumeProgressBar = QProgressBar()

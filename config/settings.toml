@@ -1,9 +1,9 @@
 language = "en"
 theme = "dark"
-def_volume = 20
+def_volume = 0
 win_width = 300
 win_height = 240
-interval_update_music = 24
+interval_update_music = 20
 interval_volume = 10
 interval_move_music = 1000
 path_to_music = ""
