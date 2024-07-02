@@ -16,8 +16,8 @@ from PyQt5.QtWidgets import (QWidget,
                              QHBoxLayout)
 
 
-ICONS_PATH = 'src\\assets\\icons\\'
-STYLES_PATH = 'src\\assets\\css\\'
+ICONS_PATH = 'src\\app\\assets\\icons\\'
+STYLES_PATH = 'src\\assets\\stylesheets\\'
 
 
 class MainWindow(QWidget):

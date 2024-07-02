@@ -23,7 +23,6 @@ class DownloaderWindow(QWidget):
         self.setStyleSheet(style)
         self.setFixedWidth(320)
         self.path = path
-        self.is_download = False
         self.init_ui()
         
     
