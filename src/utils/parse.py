@@ -1,6 +1,7 @@
 from toml import (load as tLoad, 
                   dump as tDump)
 
+
 class Settings:
     def __init__(self, filename):
         self.filename = filename
@@ -26,3 +27,9 @@ class Settings:
         self.data[key] = value
         self.save()
         return 
+    
+
+class Language:
+    def __init__(self, filename):
+        pass
+    
