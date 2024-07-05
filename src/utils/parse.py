@@ -31,5 +31,14 @@ class Settings:
 
 class Language:
     def __init__(self, filename):
-        pass
+        self.filename = filename
+        self.data = self.parse_file()
+        
+    def parse_file(self):
+        with open(self.filename, 'r') as lang_file:
+            return tLoad.load(lang_file)
+        
+    
+ 
+    
     
