@@ -7,7 +7,7 @@ from PyQt5.QtMultimedia import QMediaPlayer
 from src.app.musicPlayback import MediaPlaybackThread
 from src.app.settingsWindow import SettingsWindow
 from src.app.downloaderWindow import DownloaderWindow
-from src.utils.parse import Settings
+from src.utils.parse import Settings, Language
 from PyQt5.QtWidgets import (QWidget, 
                              QVBoxLayout, 
                              QPushButton, 
@@ -22,10 +22,11 @@ STYLES_PATH = 'src\\app\\assets\\stylesheets\\'
 
 class MainWindow(QWidget):
     
-    def __init__(self, configPath):
+    def __init__(self, configPath, langPath):
         super().__init__()
         
         self.settings = Settings(configPath)
+        self.lg = Language(langPath).get
         
         self.setWindowTitle('PyPy MusicPlayer')
         self.setFixedSize(QSize(self.settings.get('win_width'),

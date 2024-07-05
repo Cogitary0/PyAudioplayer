@@ -1,0 +1,20 @@
+[ru]
+Hello = 'Привет'
+Language = 'Язык'
+Theme = 'Тема'
+Light = 'Светлый'
+Dark = 'Тёмный'
+IntervalToUpdateMusic = 'Интервал  обновления (мс)'
+IntervalToMoveMusic = 'Интервал перематывания (мс)'
+StartVolume = 'Начальный звук (%)'
+
+[en]
+Hello = 'Hello'
+Language = 'Language'
+Theme = 'Theme'
+Light = 'Light'
+Dark = 'Dark'
+IntervalToUpdateMusic = 'Interval to update music (ms)'
+IntervalToMoveMusic = 'Interval to move music (ms)'
+StartVolume = 'Start volume (%)'
+

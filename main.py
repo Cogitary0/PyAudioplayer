@@ -12,7 +12,7 @@ if __name__ == "__main__":
     sysArgv += ['-platform']
     
     app = QApplication(sysArgv)
-    player = MainWindow('config\\settings.toml')
+    player = MainWindow('config\\settings.toml', 'config\\language.toml')
     
     player.show()
     sysExit(app.exec_())

@@ -1,4 +1,4 @@
-from src.utils.parse import Settings
+from src.utils.parse import Settings, Language
 from PyQt5.QtWidgets import (QWidget, 
                              QVBoxLayout, 
                              QPushButton, 
@@ -13,29 +13,31 @@ class SettingsWindow(QWidget):
         super().__init__()
 
         self.settings = Settings('config\\settings.toml')
+        self.lang = Language('config\\language.toml', self.settings.get('language'))
+        self.lg = self.lang.get 
         self.setStyleSheet(style)
         self.setWindowTitle('Settings')
 
         self.settings_fields = [
-            {"label": "Language:", 
+            {"label": f"{self.lg('Language')}:", 
              "key": 'language', 
              "type": str,
              "options": ["en", "ru"]},
             
-            {"label": "Theme app:", 
+            {"label": f"{self.lg('Theme')}:", 
              "key": 'theme', 
              "type": str,
-             "options": ["light", "dark"]},
+             "options": [f"{self.lg('Light')}", f"{self.lg('Dark')}"]},
             
-            {"label": "Interval to update music (ms):", 
+            {"label": f"{self.lg('IntervalToUpdateMusic')}:", 
              "key": 'interval_update_music', 
              "type": int},
             
-            {"label": "Interval to move music (ms):", 
+            {"label": f"{self.lg('IntervalToMoveMusic')}:", 
              "key": 'interval_move_music', 
              "type": int},
             
-            {"label": "Start volume %:", 
+            {"label": f"{self.lg('StartVolume')}:", 
              "key": 'def_volume', 
              "type": int},
             

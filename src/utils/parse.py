@@ -30,13 +30,22 @@ class Settings:
     
 
 class Language:
-    def __init__(self, filename):
+    def __init__(self, filename, language):
         self.filename = filename
-        self.data = self.parse_file()
+        self.language = language
+        self.data = self.get_file()
         
-    def parse_file(self):
-        with open(self.filename, 'r') as lang_file:
-            return tLoad.load(lang_file)
+        
+    def get_file(self):
+        with open(self.filename, 'r', encoding='utf-8') as lang_file:
+            return tLoad(lang_file)
+        
+        
+    def get(self, word:str) -> str:
+        return self.data.get(self.language)[word]
+    
+    
+
         
     
  
