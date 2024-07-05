@@ -24,7 +24,7 @@ class SettingsWindow(QWidget):
             {"label": f"{self.lg('Language')}:", 
              "key": 'language', 
              "type": str,
-             "options": ["en", "ru"]},
+             "options": self.lang.get_lang()},
             
             {"label": f"{self.lg('Theme')}:", 
              "key": 'theme', 

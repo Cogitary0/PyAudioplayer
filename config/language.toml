@@ -17,4 +17,3 @@ IntervalToMoveMusic = 'Interval to move music (ms)'
 StartVolume = 'Start volume (%)'
 NoMusicFiles = 'No music files found in the folder'
 NoMeta = 'No metadata available'
-
