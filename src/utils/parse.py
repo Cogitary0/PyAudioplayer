@@ -36,7 +36,7 @@ class Language:
         self.data = self.get_file()
         
         
-    def get_file(self):
+    def get_file(self) -> dict:
         with open(self.filename, 'r', encoding='utf-8') as lang_file:
             return tLoad(lang_file)
         

@@ -1,5 +1,5 @@
-language = "en"
-theme = "Светлый"
+language = "ru"
+theme = "dark"
 def_volume = 0
 win_width = 300
 win_height = 240
@@ -7,7 +7,7 @@ interval_update_music = 20
 interval_volume = 10
 interval_move_music = 1000
 path_to_music = ""
-current_song = 3
+current_song = 4
 count_musics = 5
 btn_volume_up = "up"
 btn_volume_down = "down"

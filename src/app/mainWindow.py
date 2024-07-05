@@ -1,5 +1,6 @@
 import os
 import time
+import sys
 from keyboard import add_hotkey
 from PyQt5.QtCore import QSize, QTimer
 from PyQt5.QtGui import QIcon
@@ -26,7 +27,7 @@ class MainWindow(QWidget):
         super().__init__()
         
         self.settings = Settings(configPath)
-        self.lg = Language(langPath).get
+        self.lg = Language(langPath, self.settings.get('language')).get
         
         self.setWindowTitle('PyPy MusicPlayer')
         self.setFixedSize(QSize(self.settings.get('win_width'),
@@ -59,7 +60,7 @@ class MainWindow(QWidget):
         if self.folder_path:
             self.set_music()
         else:
-            self.print_label(" No metadata available")
+            self.print_label(f" {self.lg('NoMeta')}")
 
     
 
@@ -165,7 +166,7 @@ class MainWindow(QWidget):
             self.settings.set('current_song', self.current_song)
             self.settings.set("count_musics", len(self.music_files))
         else:
-            self.print_label(" No music files found in the folder.")
+            self.print_label(f" {self.lg('NoMusicFiles')}.")
 
 
     def play_song(self, filename):    
@@ -228,7 +229,7 @@ class MainWindow(QWidget):
                 # author = self.media_player.metaData('Author')
                 self.print_label(" {}".format(title))
             else:
-                self.print_label(" No metadata available")
+                self.print_label(f" {self.lg('NoMeta')}")
 
 
     def update_position(self, position):
@@ -285,7 +286,7 @@ class MainWindow(QWidget):
     def open_settings(self):
         self.settings_window = SettingsWindow(self.get_style_file('settings'))
         self.settings_window.show()
-            
+    
             
     def open_downloader(self):
         self.downloader_window = DownloaderWindow(self.get_style_file('styles'), self.folder_path)

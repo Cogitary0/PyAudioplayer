@@ -2,19 +2,19 @@
 Hello = 'Привет'
 Language = 'Язык'
 Theme = 'Тема'
-Light = 'Светлый'
-Dark = 'Тёмный'
 IntervalToUpdateMusic = 'Интервал  обновления (мс)'
 IntervalToMoveMusic = 'Интервал перематывания (мс)'
 StartVolume = 'Начальный звук (%)'
+NoMusicFiles = 'В папке не найдено музыкальных файлов'
+NoMeta = 'Нет доступных метаданных'
 
 [en]
 Hello = 'Hello'
 Language = 'Language'
 Theme = 'Theme'
-Light = 'Light'
-Dark = 'Dark'
 IntervalToUpdateMusic = 'Interval to update music (ms)'
 IntervalToMoveMusic = 'Interval to move music (ms)'
 StartVolume = 'Start volume (%)'
+NoMusicFiles = 'No music files found in the folder'
+NoMeta = 'No metadata available'
 

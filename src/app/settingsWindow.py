@@ -1,3 +1,5 @@
+from os import execl as osExecl
+from sys import executable as sysExct, argv as sysArgv
 from src.utils.parse import Settings, Language
 from PyQt5.QtWidgets import (QWidget, 
                              QVBoxLayout, 
@@ -27,7 +29,7 @@ class SettingsWindow(QWidget):
             {"label": f"{self.lg('Theme')}:", 
              "key": 'theme', 
              "type": str,
-             "options": [f"{self.lg('Light')}", f"{self.lg('Dark')}"]},
+             "options": ["dark", "light"]},
             
             {"label": f"{self.lg('IntervalToUpdateMusic')}:", 
              "key": 'interval_update_music', 
@@ -104,3 +106,7 @@ class SettingsWindow(QWidget):
                 self.settings.set(field["key"], field["type"](field["edit"].text()))
                 
         self.close()
+        
+        __win = sysExct
+        osExecl(__win, __win, *sysArgv)
+        
