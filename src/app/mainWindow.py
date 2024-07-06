@@ -10,10 +10,11 @@ from src.app.settingsWindow import SettingsWindow
 from src.app.downloaderWindow import DownloaderWindow
 from src.utils.parse import Settings, Language
 from PyQt5.QtWidgets import (QWidget, 
+                             QLabel, 
                              QVBoxLayout, 
                              QPushButton, 
                              QFileDialog, 
-                             QLabel, QProgressBar,
+                             QProgressBar,
                              QHBoxLayout)
 
 
@@ -28,7 +29,7 @@ class MainWindow(QWidget):
         
         self.settings = Settings(configPath)
         self.lg = Language(langPath, self.settings.get('language')).get
-        
+
         self.setWindowTitle('PyPy MusicPlayer')
         self.setFixedSize(QSize(self.settings.get('win_width'),
                                 self.settings.get('win_height')))
