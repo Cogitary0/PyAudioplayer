@@ -30,14 +30,14 @@ class MainWindow(QWidget):
         self.settings = Settings(configPath)
         self.lg = Language(langPath, self.settings.get('language')).get
 
-        self.setWindowTitle('PyPy MusicPlayer')
+        # self.setWindowTitle('PyPy MusicPlayer')
         self.setFixedSize(QSize(self.settings.get('win_width'),
                                 self.settings.get('win_height')))
         
         self.play_icon = QIcon(ICONS_PATH + 'play.png')
         self.stop_icon = QIcon(ICONS_PATH + 'stop.png')
-        self.next_icon = QIcon(ICONS_PATH + 'next.png')
-        self.prev_icon = QIcon(ICONS_PATH + 'prev.png')
+        self.next_icon = QIcon(ICONS_PATH + 'fast_forward_filledright_ar.png')
+        self.prev_icon = QIcon(ICONS_PATH + 'fast_rewind_filledleft_ar.png')
         self.folder_icon = QIcon(ICONS_PATH + 'folderOpen.png')
         self.downloader_icon = QIcon(ICONS_PATH + 'downloader.png')
         self.settings_icon = QIcon(ICONS_PATH + 'settings.png')
@@ -68,11 +68,11 @@ class MainWindow(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
         controlLayout = QHBoxLayout()
-        utilsLayout = QHBoxLayout()
+        sliderLayout = QHBoxLayout()
 
-        self.statusLabel = QLabel()
-        self.statusLabel.setFixedHeight(60)
-        layout.addWidget(self.statusLabel)
+        # self.statusLabel = QLabel()
+        # self.statusLabel.setFixedHeight(60)
+        # layout.addWidget(self.statusLabel)
         
         self.positionProgressBar = QProgressBar()
         self.positionProgressBar.setRange(0, 0)
@@ -80,7 +80,7 @@ class MainWindow(QWidget):
         self.positionProgressBar.setTextVisible(False)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_plus'), self.position_plus)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_minus'), self.position_minus)
-        layout.addWidget(self.positionProgressBar)
+        sliderLayout.addWidget(self.positionProgressBar, stretch=5)
         
         self.volumeProgressBar = QProgressBar()
         self.volumeProgressBar.setRange(0, 100)
@@ -88,40 +88,40 @@ class MainWindow(QWidget):
         self.volumeProgressBar.setTextVisible(False)
         self.volume_up_shortcut = add_hotkey(self.settings.get('btn_volume_up'), self.volume_up)
         self.volume_down_shortcut = add_hotkey(self.settings.get('btn_volume_down'), self.volume_down)
-        layout.addWidget(self.volumeProgressBar)
+        sliderLayout.addWidget(self.volumeProgressBar, stretch=1)
         
-        self.settingsButton = QPushButton()
-        self.settingsButton.setIcon(self.settings_icon)
-        self.settingsButton.clicked.connect(self.open_settings)
-        utilsLayout.addWidget(self.settingsButton, stretch=1)
+        # self.settingsButton = QPushButton()
+        # self.settingsButton.setIcon(self.settings_icon)
+        # self.settingsButton.clicked.connect(self.open_settings)
+        # controlLayout.addWidget(self.settingsButton, stretch=1)
 
         self.openFolderButton = QPushButton()
         self.openFolderButton.setIcon(self.folder_icon)
         self.openFolderButton.clicked.connect(self.open_folder)
-        utilsLayout.addWidget(self.openFolderButton, stretch=4)
+        controlLayout.addWidget(self.openFolderButton, stretch=1)
 
         self.prevButton = QPushButton()
         self.prevButton.setIcon(self.prev_icon)
         self.prevButton.clicked.connect(self.prev_song)
-        controlLayout.addWidget(self.prevButton)
+        controlLayout.addWidget(self.prevButton, stretch=1)
 
         self.playStopButton = QPushButton()
         self.playStopButton.setIcon(self.play_icon)
         self.playStopButton.clicked.connect(self.play_stop_song)
-        controlLayout.addWidget(self.playStopButton)
+        controlLayout.addWidget(self.playStopButton, stretch=1)
 
         self.nextButton = QPushButton()
         self.nextButton.setIcon(self.next_icon)
         self.nextButton.clicked.connect(self.next_song)
-        controlLayout.addWidget(self.nextButton)
+        controlLayout.addWidget(self.nextButton, stretch=1)
 
         self.windowDownloader = QPushButton()
         self.windowDownloader.setIcon(self.downloader_icon)
         self.windowDownloader.clicked.connect(self.open_downloader)
-        utilsLayout.addWidget(self.windowDownloader, stretch=1)
+        controlLayout.addWidget(self.windowDownloader, stretch=1)
 
+        layout.addLayout(sliderLayout)
         layout.addLayout(controlLayout)
-        layout.addLayout(utilsLayout)
 
         self.setLayout(layout)
         self.enabled_widget(False)
@@ -140,7 +140,8 @@ class MainWindow(QWidget):
 
 
     def print_label(self, text):
-        self.statusLabel.setText(text)
+        # self.statusLabel.setText(text)
+        self.setWindowTitle(text)
 
 
     def enabled_widget(self, enabled: bool):
