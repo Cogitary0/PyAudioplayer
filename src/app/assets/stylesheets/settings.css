@@ -1,6 +1,10 @@
-QWidget {
-    background-color: #242424;
+MainWindow {
+    background-image: url("src\app\assets\icons\main-background.png");
 }
+
+/* QWidget {
+    background-color: #242424;
+} */
 
 QLineEdit {
     background-color: #303030;
@@ -34,16 +38,16 @@ QHBoxLayout {
 }
 
 QPushButton {
+    border: 2px solid #333;
+    border-radius: 2px;
     background-color: #333;
     padding: 6px;
-    border-radius: 5px;
     color: #ffffff;
     width: 32px;
     height: 32px;
     icon-size: 26px;
     font-size: 20px;
     font-family: 'Open Sans', sans-serif;
-
 }
 
 QPushButton:hover {
@@ -51,10 +55,9 @@ QPushButton:hover {
 }
 
 QPushButton:pressed {
-    /* background-color: #555; */
     background-color: #395fc7;
-    padding: 4px; 
-    font-size: 32px; 
+    padding: 4px;
+    font-size: 32px;
 }
 
 QScrollBar:vertical {

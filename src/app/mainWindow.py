@@ -30,14 +30,13 @@ class MainWindow(QWidget):
         self.settings = Settings(configPath)
         self.lg = Language(langPath, self.settings.get('language')).get
 
-        # self.setWindowTitle('PyPy MusicPlayer')
         self.setFixedSize(QSize(self.settings.get('win_width'),
                                 self.settings.get('win_height')))
         
         self.play_icon = QIcon(ICONS_PATH + 'play.png')
         self.stop_icon = QIcon(ICONS_PATH + 'stop.png')
-        self.next_icon = QIcon(ICONS_PATH + 'fast_forward_filledright_ar.png')
-        self.prev_icon = QIcon(ICONS_PATH + 'fast_rewind_filledleft_ar.png')
+        self.next_icon = QIcon(ICONS_PATH + 'fast_next.png')
+        self.prev_icon = QIcon(ICONS_PATH + 'fast_prev.png')
         self.folder_icon = QIcon(ICONS_PATH + 'folderOpen.png')
         self.downloader_icon = QIcon(ICONS_PATH + 'downloader.png')
         self.settings_icon = QIcon(ICONS_PATH + 'settings.png')
@@ -58,6 +57,7 @@ class MainWindow(QWidget):
 
         self.init_ui()
 
+        # No music folder
         if self.folder_path:
             self.set_music()
         else:
@@ -80,7 +80,7 @@ class MainWindow(QWidget):
         self.positionProgressBar.setTextVisible(False)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_plus'), self.position_plus)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_minus'), self.position_minus)
-        sliderLayout.addWidget(self.positionProgressBar, stretch=5)
+        sliderLayout.addWidget(self.positionProgressBar, stretch=7)
         
         self.volumeProgressBar = QProgressBar()
         self.volumeProgressBar.setRange(0, 100)
