@@ -40,7 +40,8 @@ class MainWindow(QWidget):
         self.music_duration = 0
         self.playing = False
         self.music_files = []
-        self.audio_trigger = True
+        self.audio_trigger = True 
+        self.current_volume = None
 
         self.init_background()
         self.init_media()
@@ -55,10 +56,10 @@ class MainWindow(QWidget):
 
 
     def init_background(self):
-        WIN_WIDTH, WIN_HEIGHT = self.settings.get('win_width'), self.settings.get('win_height')
-        self.setFixedSize(QSize(WIN_WIDTH, WIN_HEIGHT))
+        win_width, win_height = self.settings.get('win_width'), self.settings.get('win_height')
+        self.setFixedSize(QSize(win_width, win_height))
         
-        background_img = QPixmap(BACKGROUND_PATH).scaled(WIN_WIDTH, WIN_HEIGHT)
+        background_img = QPixmap(BACKGROUND_PATH).scaled(win_width, win_height)
         pal = self.palette()
         pal.setBrush(QPalette.Background, QBrush(background_img))
         self.setPalette(pal)
@@ -70,6 +71,7 @@ class MainWindow(QWidget):
         self.media_player.positionChanged.connect(self.update_position)
         self.media_player.durationChanged.connect(self.update_duration)
         self.media_player.stateChanged.connect(self.media_state_changed)
+        self.current_volume = self.media_player.setVolume(self.settings.get('def_volume'))
 
 
     def init_assets(self):
@@ -98,15 +100,6 @@ class MainWindow(QWidget):
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_plus'), self.position_plus)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_minus'), self.position_minus)
         layout.addWidget(self.positionProgressBar, stretch = 3)
-
-        # self.volumeProgressBar = QProgressBar()
-        # self.volumeProgressBar.setRange(0, 100)
-        # self.volumeProgressBar.setValue(self.settings.get('def_volume'))
-        # self.volumeProgressBar.setTextVisible(False)
-        # self.volumeProgressBar.setFixedHeight(7)
-        # self.volume_up_shortcut = add_hotkey(self.settings.get('btn_volume_up'), self.volume_up)
-        # self.volume_down_shortcut = add_hotkey(self.settings.get('btn_volume_down'), self.volume_down)
-        # layout.addWidget(self.volumeProgressBar, stretch = 1)
 
         # self.settingsButton = QPushButton()
         # self.settingsButton.setIcon(self.settings_icon)
@@ -235,11 +228,6 @@ class MainWindow(QWidget):
             self.settings.set('current_song', self.current_song)
 
 
-    def change_volume(self, value):
-        self.media_player.setVolume(value)
-        self.volumeProgressBar.setValue(value)
-
-
     def print_media_data(self):
         if self.media_player.mediaStatus() == 6:
             if self.media_player.isMetaDataAvailable():
@@ -263,20 +251,6 @@ class MainWindow(QWidget):
     def update_position_slider(self):
         position = self.media_player.position()
         self.positionProgressBar.setValue(position)
-       
-        
-    def volume_up(self):
-        current_volume = self.volumeProgressBar.value()
-        if current_volume < 100:
-            self.volumeProgressBar.setValue(current_volume + 1)
-            self.media_player.setVolume(current_volume + 1)
-
-
-    def volume_down(self):
-        current_volume = self.volumeProgressBar.value()
-        if current_volume > 0:
-            self.volumeProgressBar.setValue(current_volume - 1)
-            self.media_player.setVolume(current_volume - 1)
     
                 
     def position_plus(self):
@@ -319,5 +293,6 @@ class MainWindow(QWidget):
             
         
     def open_volume(self):
-        self.volume_window = VolumeWindow(self.settings, self.get_style_file('settings'))
+        self.volume_window = VolumeWindow(self.media_player, self.current_volume, self.get_style_file('volume_slider'))
+        self.volume_window.show()
         
