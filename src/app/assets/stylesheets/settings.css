@@ -1,6 +1,8 @@
-MainWindow {
-    background-image: url("src\app\assets\icons\main-background.png");
-}
+/* MainWindow {
+    background-image: url("..\icons\main-background.png");
+    background-repeat: no-repeat; 
+    background-position: center;
+} */
 
 /* QWidget {
     background-color: #242424;

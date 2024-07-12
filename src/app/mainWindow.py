@@ -3,13 +3,13 @@ import time
 import sys
 from keyboard import add_hotkey
 from PyQt5.QtCore import QSize, QTimer
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap, QPalette, QBrush
 from PyQt5.QtMultimedia import QMediaPlayer
 from src.app.musicPlayback import MediaPlaybackThread
 from src.app.settingsWindow import SettingsWindow
 from src.app.downloaderWindow import DownloaderWindow
 from src.utils.parse import Settings, Language
-from PyQt5.QtWidgets import (QWidget, 
+from PyQt5.QtWidgets import (QWidget,
                              QLabel, 
                              QVBoxLayout, 
                              QPushButton, 
@@ -20,8 +20,9 @@ from PyQt5.QtWidgets import (QWidget,
 
 ICONS_PATH = 'src\\app\\assets\\icons\\'
 STYLES_PATH = 'src\\app\\assets\\stylesheets\\'
-
-
+BACKGROUND_PATH = os.path.dirname(__file__) + '\\assets\\icons\\main_background.png'
+      
+        
 class MainWindow(QWidget):
     
     def __init__(self, configPath, langPath):
@@ -30,18 +31,24 @@ class MainWindow(QWidget):
         self.settings = Settings(configPath)
         self.lg = Language(langPath, self.settings.get('language')).get
 
-        self.setFixedSize(QSize(self.settings.get('win_width'),
-                                self.settings.get('win_height')))
+        WIN_WIDTH, WIN_HEIGHT = self.settings.get('win_width'), self.settings.get('win_height')
         
         self.play_icon = QIcon(ICONS_PATH + 'play.png')
-        self.stop_icon = QIcon(ICONS_PATH + 'stop.png')
-        self.next_icon = QIcon(ICONS_PATH + 'fast_next.png')
-        self.prev_icon = QIcon(ICONS_PATH + 'fast_prev.png')
-        self.folder_icon = QIcon(ICONS_PATH + 'folderOpen.png')
+        self.stop_icon = QIcon(ICONS_PATH + 'pause.png')
+        self.next_icon = QIcon(ICONS_PATH + 'next.png')
+        self.prev_icon = QIcon(ICONS_PATH + 'prev.png')
+        self.folder_icon = QIcon(ICONS_PATH + 'folder_filled.png')
         self.downloader_icon = QIcon(ICONS_PATH + 'downloader.png')
         self.settings_icon = QIcon(ICONS_PATH + 'settings.png')
         self.setStyleSheet(self.get_style_file('styles'))
-
+        self.setFixedSize(QSize(WIN_WIDTH, WIN_HEIGHT))
+        
+        bgnd = QPixmap(BACKGROUND_PATH).scaled(WIN_WIDTH, WIN_HEIGHT)
+        # bgnd = QPixmap("C:\\Users\\asd\\Desktop\\Kraject\\AppPython\\PyPyAudioplayer\\src\\app\\assets\\icons\\main_background.png").scaled(400,100)
+        pal = self.palette()
+        pal.setBrush(QPalette.Background, QBrush(bgnd))
+        self.setPalette(pal)
+        
         self.media_player = QMediaPlayer(None, QMediaPlayer.StreamPlayback)
         self.media_player.mediaStatusChanged.connect(self.print_media_data)
         self.media_player.positionChanged.connect(self.update_position)
@@ -74,22 +81,24 @@ class MainWindow(QWidget):
         # self.statusLabel.setFixedHeight(60)
         # layout.addWidget(self.statusLabel)
         
+        # self.volumeProgressBar = QProgressBar()
+        # self.volumeProgressBar.setRange(0, 100)
+        # self.volumeProgressBar.setValue(self.settings.get('def_volume'))
+        # self.volumeProgressBar.setTextVisible(False)
+        # self.volumeProgressBar.setFixedSize(377, 8)
+        # self.volume_up_shortcut = add_hotkey(self.settings.get('btn_volume_up'), self.volume_up)
+        # self.volume_down_shortcut = add_hotkey(self.settings.get('btn_volume_down'), self.volume_down)
+        # sliderLayout.addWidget(self.volumeProgressBar, stretch=1)
+        
         self.positionProgressBar = QProgressBar()
         self.positionProgressBar.setRange(0, 0)
         self.positionProgressBar.setValue(0)
         self.positionProgressBar.setTextVisible(False)
+        self.positionProgressBar.setFixedSize(370,6)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_plus'), self.position_plus)
         self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_minus'), self.position_minus)
-        sliderLayout.addWidget(self.positionProgressBar, stretch=7)
-        
-        self.volumeProgressBar = QProgressBar()
-        self.volumeProgressBar.setRange(0, 100)
-        self.volumeProgressBar.setValue(self.settings.get('def_volume'))
-        self.volumeProgressBar.setTextVisible(False)
-        self.volume_up_shortcut = add_hotkey(self.settings.get('btn_volume_up'), self.volume_up)
-        self.volume_down_shortcut = add_hotkey(self.settings.get('btn_volume_down'), self.volume_down)
-        sliderLayout.addWidget(self.volumeProgressBar, stretch=1)
-        
+        sliderLayout.addWidget(self.positionProgressBar)
+
         # self.settingsButton = QPushButton()
         # self.settingsButton.setIcon(self.settings_icon)
         # self.settingsButton.clicked.connect(self.open_settings)

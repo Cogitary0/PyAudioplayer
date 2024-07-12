@@ -13,7 +13,6 @@ if __name__ == "__main__":
     
     app = QApplication(sysArgv)
     player = MainWindow('config\\settings.toml', 'config\\language.toml')
-    
     player.show()
     sysExit(app.exec_())
     
