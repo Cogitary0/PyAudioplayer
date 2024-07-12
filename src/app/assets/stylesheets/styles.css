@@ -14,7 +14,7 @@ QPushButton:pressed {
     background-color: transparent;
     border-color: transparent;
     color: transparent;
-    icon-size: 28px;
+    icon-size: 29px;
 }
 
 /* QPushButton {
@@ -81,6 +81,6 @@ QProgressBar::chunk {
     /* background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #141414, stop: 1 #4e4e4e); */
     background-color: #DB602C;
     border-radius: 2px;
-    /* width: 2px; */
-    /* height: 1px; */
+    width: 2px;
+    height: 1px;
 }
