@@ -1,18 +1,17 @@
 import os
 import time
-import sys
 from keyboard import add_hotkey
 
 from src.app.musicPlayback import MediaPlaybackThread
 from src.app.settingsWindow import SettingsWindow
 from src.app.downloaderWindow import DownloaderWindow
-from src.app.volumeWindow import VolumeWindow
 from src.utils.parse import Settings, Language
 
-from PyQt5.QtCore import QSize, QTimer
+from PyQt5.QtCore import QSize, QTimer, Qt
 from PyQt5.QtGui import QIcon, QPixmap, QPalette, QBrush
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import (QWidget,
+                             QSlider,
                              QLabel, 
                              QVBoxLayout, 
                              QPushButton,
@@ -32,7 +31,7 @@ class MainWindow(QWidget):
         super().__init__()
         
         self.settings = Settings(configPath)
-        self.lg = Language(langPath, self.settings.get('language')).get
+        self.lang = Language(langPath, self.settings.get('language')).get
         
         self.folder_path = self.settings.get('path_to_music')
         self.current_song = self.settings.get('current_song')
@@ -45,6 +44,7 @@ class MainWindow(QWidget):
 
         self.init_background()
         self.init_media()
+        self.init_buttons()
         self.init_assets()
         self.init_ui()
 
@@ -52,8 +52,8 @@ class MainWindow(QWidget):
         if self.folder_path:
             self.set_music()
         else:
-            self.print_label(f" {self.lg('NoMeta')}")
-
+            self.print_label(f" {self.lang('NoMeta')}")
+            
 
     def init_background(self):
         win_width, win_height = self.settings.get('win_width'), self.settings.get('win_height')
@@ -71,7 +71,7 @@ class MainWindow(QWidget):
         self.media_player.positionChanged.connect(self.update_position)
         self.media_player.durationChanged.connect(self.update_duration)
         self.media_player.stateChanged.connect(self.media_state_changed)
-        self.current_volume = self.media_player.setVolume(self.settings.get('def_volume'))
+        self.current_volume = self.media_player.setVolume(self.settings.get('current_volume'))
 
 
     def init_assets(self):
@@ -87,29 +87,30 @@ class MainWindow(QWidget):
         self.volume_off_icon = QIcon(ICONS_PATH + 'vol_off.png')
         self.setStyleSheet(self.get_style_file('styles'))
         
+        
+    def init_buttons(self):
+        self.volume_up = add_hotkey(self.settings.get('btn_volume_up'), self.volume_up)
+        self.volume_down = add_hotkey(self.settings.get("btn_volume_down"), self.volume_down)
+        self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_plus'), self.position_plus)
+        self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_minus'), self.position_minus)
+        
 
     def init_ui(self):
         layout = QVBoxLayout()
         controlLayout = QHBoxLayout()
+        volumeLayout = QHBoxLayout()
         
         self.positionProgressBar = QProgressBar()
         self.positionProgressBar.setRange(0, 0)
         self.positionProgressBar.setValue(0)
         self.positionProgressBar.setTextVisible(False)
         self.positionProgressBar.setFixedHeight(7)
-        self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_plus'), self.position_plus)
-        self.position_plus_shortcut = add_hotkey(self.settings.get('btn_music_minus'), self.position_minus)
         layout.addWidget(self.positionProgressBar, stretch = 3)
-
-        # self.settingsButton = QPushButton()
-        # self.settingsButton.setIcon(self.settings_icon)
-        # self.settingsButton.clicked.connect(self.open_settings)
-        # controlLayout.addWidget(self.settingsButton, stretch=1)
-
-        self.volumeWindowButton = QPushButton()
-        self.volumeWindowButton.setIcon(self.volume_on_icon)
-        self.volumeWindowButton.clicked.connect(self.open_volume)
-        controlLayout.addWidget(self.volumeWindowButton)
+                
+        self.openFolderButton = QPushButton()
+        self.openFolderButton.setIcon(self.folder_icon)
+        self.openFolderButton.clicked.connect(self.open_folder)
+        controlLayout.addWidget(self.openFolderButton, stretch=1)
 
         self.prevButton = QPushButton()
         self.prevButton.setIcon(self.prev_icon)
@@ -126,15 +127,21 @@ class MainWindow(QWidget):
         self.nextButton.clicked.connect(self.next_song)
         controlLayout.addWidget(self.nextButton, stretch=1)
         
-        self.openFolderButton = QPushButton()
-        self.openFolderButton.setIcon(self.folder_icon)
-        self.openFolderButton.clicked.connect(self.open_folder)
-        controlLayout.addWidget(self.openFolderButton, stretch=1)
+        self.volumeButton = QPushButton()
+        self.volumeButton.setIcon(self.volume_on_icon)
+        # self.volumeButton.clicked.connect(self.volume_on_off)
+        volumeLayout.addWidget(self.volumeButton)
         
-        # self.menuButton = QPushButton()
-        # self.menuButton.setIcon(self.menu_icon)
-        # self.menuButton.clicked.connect(self.open_menu)
-        # controlLayout.addWidget(self.menuButton, stretch=1)
+        # self.volumeSlider = QSlider(Qt.Orientation.Horizontal)
+        # self.volumeSlider.setRange(0, 100)
+        # self.volumeSlider.setValue(self.settings.get('def_volume'))
+        # self.volumeSlider.valueChanged.connect(self.volume_change)
+        # volumeLayout.addWidget(self.volumeSlider)
+        
+        self.volumeInfo = QLabel()
+        self.print_volume_label(self.settings.get('current_volume'))
+        volumeLayout.addWidget(self.volumeInfo)
+        controlLayout.addLayout(volumeLayout, stretch=2)
         
         layout.addLayout(controlLayout)
 
@@ -159,6 +166,10 @@ class MainWindow(QWidget):
         self.setWindowTitle(text)
 
 
+    def print_volume_label(self, text):
+        self.volumeInfo.setText(f"{text}%") 
+    
+
     def enabled_widget(self, enabled: bool):
         if self.playing:
             self.playStopButton.setEnabled(enabled)
@@ -177,7 +188,7 @@ class MainWindow(QWidget):
             self.settings.set('current_song', self.current_song)
             self.settings.set("count_musics", len(self.music_files))
         else:
-            self.print_label(f" {self.lg('NoMusicFiles')}.")
+            self.print_label(f" {self.lang('NoMusicFiles')}.")
 
 
     def play_song(self, filename):    
@@ -235,7 +246,7 @@ class MainWindow(QWidget):
                 # author = self.media_player.metaData('Author')
                 self.print_label(" {}".format(title))
             else:
-                self.print_label(f" {self.lg('NoMeta')}")
+                self.print_label(f" {self.lang('NoMeta')}")
 
 
     def update_position(self, position):
@@ -269,6 +280,26 @@ class MainWindow(QWidget):
             self.media_player.play()
             
     
+    def volume_change(self):
+        self.media_player.setVolume(self.settings.get('current_volume'))
+        
+        
+    def volume_up(self):
+        current_volume = self.settings.get('current_volume')
+        if current_volume < 100:
+            self.media_player.setVolume(current_volume + 1)
+            self.settings.set("current_volume", current_volume)
+            self.print_volume_label(current_volume)
+
+
+    def volume_down(self):
+        current_volume = self.settings.get('current_volume')
+        if current_volume > 0:
+            self.media_player.setVolume(current_volume - 1)
+            self.settings.set("current_volume", current_volume)
+            self.print_volume_label(current_volume)
+
+
     def get_music(self):
         __max_len_text = 28
         __text = self.music_files[self.current_song].split('.')[0]
@@ -291,8 +322,5 @@ class MainWindow(QWidget):
         if self.folder_path:
             self.set_music()
             
-        
-    def open_volume(self):
-        self.volume_window = VolumeWindow(self.media_player, self.current_volume, self.get_style_file('volume_slider'))
-        self.volume_window.show()
+            
         
