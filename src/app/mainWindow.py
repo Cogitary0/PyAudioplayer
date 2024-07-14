@@ -35,6 +35,8 @@ class MainWindow(QWidget):
         
         self.folder_path = self.settings.get('path_to_music')
         self.current_song = self.settings.get('current_song')
+        self.step_volume = self.settings.get('step_volume')
+        self.step_music = self.settings.get('step_music')
         
         self.music_duration = 0
         self.playing = False
@@ -52,7 +54,7 @@ class MainWindow(QWidget):
         if self.folder_path:
             self.set_music()
         else:
-            self.print_label(f" {self.lang('NoMeta')}")
+            self.print_label(f"{self.lang('NoMeta')}")
             
 
     def init_background(self):
@@ -98,7 +100,6 @@ class MainWindow(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
         controlLayout = QHBoxLayout()
-        volumeLayout = QHBoxLayout()
         
         self.positionProgressBar = QProgressBar()
         self.positionProgressBar.setRange(0, 0)
@@ -130,8 +131,7 @@ class MainWindow(QWidget):
         self.volumeButton = QPushButton()
         self.volumeButton.setIcon(self.volume_on_icon)
         # self.volumeButton.clicked.connect(self.volume_on_off)
-        volumeLayout.addWidget(self.volumeButton)
-        
+        controlLayout.addWidget(self.volumeButton)
         # self.volumeSlider = QSlider(Qt.Orientation.Horizontal)
         # self.volumeSlider.setRange(0, 100)
         # self.volumeSlider.setValue(self.settings.get('def_volume'))
@@ -140,8 +140,7 @@ class MainWindow(QWidget):
         
         self.volumeInfo = QLabel()
         self.print_volume_label(self.settings.get('current_volume'))
-        volumeLayout.addWidget(self.volumeInfo)
-        controlLayout.addLayout(volumeLayout, stretch=2)
+        controlLayout.addWidget(self.volumeInfo)
         
         layout.addLayout(controlLayout)
 
@@ -150,7 +149,7 @@ class MainWindow(QWidget):
         self.play_stop_song()
         
         self.timer = QTimer()
-        self.timer.setInterval(self.settings.get('interval_update_music'))
+        self.timer.setInterval(self.step_music)
         self.timer.timeout.connect(self.update_position_slider)
         self.timer.start()
 
@@ -268,7 +267,7 @@ class MainWindow(QWidget):
         if self.playing:
             position = self.media_player.position()
             self.media_player.pause()
-            self.media_player.setPosition(position + self.settings.get('interval_move_music')) 
+            self.media_player.setPosition(position + self.step_music) 
             self.media_player.play()
 
 
@@ -276,7 +275,7 @@ class MainWindow(QWidget):
         if self.playing:
             position = self.media_player.position()
             self.media_player.pause()  
-            self.media_player.setPosition(position - self.settings.get('interval_move_music'))
+            self.media_player.setPosition(position - self.step_music)
             self.media_player.play()
             
     
@@ -287,7 +286,8 @@ class MainWindow(QWidget):
     def volume_up(self):
         current_volume = self.settings.get('current_volume')
         if current_volume < 100:
-            self.media_player.setVolume(current_volume + 1)
+            current_volume += self.step_volume
+            self.media_player.setVolume(current_volume)
             self.settings.set("current_volume", current_volume)
             self.print_volume_label(current_volume)
 
@@ -295,7 +295,8 @@ class MainWindow(QWidget):
     def volume_down(self):
         current_volume = self.settings.get('current_volume')
         if current_volume > 0:
-            self.media_player.setVolume(current_volume - 1)
+            current_volume -= self.step_volume
+            self.media_player.setVolume(current_volume)
             self.settings.set("current_volume", current_volume)
             self.print_volume_label(current_volume)
 
