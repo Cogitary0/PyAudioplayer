@@ -1,9 +1,9 @@
 language = "en"
 theme = "dark"
 def_volume = 0
-current_volume = 80
+current_volume = 0
 win_width = 280
-win_height = 100
+win_height = 97
 interval_update_music = 20
 step_volume = 10
 step_music = 1000
